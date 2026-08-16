@@ -18,16 +18,32 @@ def remove_avasaana(s):
 
 def aadesh(s, ii, aa):
     del s[ii]
-    s[ii:ii] = get_vinyaasa(aa)
+    if aa == "≍":
+        s[ii:ii] = ["≍"]
+    else:
+        s[ii:ii] = get_vinyaasa(aa)
     return s
 
 def pre_processing(df):
-    return get_vinyaasa(list(df["स्थिति"])[-1])
+    raw = list(df["स्थिति"])[-1]
+    try:
+        return get_vinyaasa(raw)
+    except:
+        # Mask ≍ so akshara does not throw Illegal Varna
+        temp_raw = raw.replace("≍", "ः")
+        v = get_vinyaasa(temp_raw)
+        return ["≍" if x == "ः" else x for x in v]
 
 def post_processing(df, s, name, number):
-    s = get_shabda(s)
+    try:
+        s_str = get_shabda(s)
+    except:
+        # Mask ≍ before get_shabda, then restore it
+        temp_s = ["ः" if x == "≍" else x for x in s]
+        s_str = get_shabda(temp_s).replace("ः", "≍")
+        
     t = "[[" + name + " (" + number + ")]]"
-    row = {"स्थिति": s, "सूत्र": t}
+    row = {"स्थिति": s_str, "सूत्र": t}
     df = pd.concat([df, pd.DataFrame([row])], ignore_index=True)
     return df
 
@@ -312,7 +328,8 @@ def खरवसानयोर्विसर्जनीयः(df):
             else:
                 df = विसर्जनीयस्य_सः(df)
         elif s[ii + 1] in ["क्", "ख्", "प्", "फ्"]:
-            df = कुप्वोः_कपौ_च(df)
+            if ACTIVE_SETTINGS.get("jihva_upadh", False):
+                df = कुप्वोः_कपौ_च(df)
         else:
             df = विसर्जनीयस्य_सः(df)
 
