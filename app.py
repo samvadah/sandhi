@@ -18,7 +18,7 @@ if lang == "संस्कृतम्":
     t_input_label = "पृथक्पदैः संस्कृतवाक्यमत्र लिख्यताम्"
     t_btn = "सन्धिर्विधीयताम्"
     t_result = "सन्धियुक्तरूपम्"
-    t_convert = "लिप्यन्तरणम्"
+    t_convert = "लिप्यन्तरणम् (Script Converter)"
     t_summary = "सारः"
     t_prakriya = "प्रक्रिया"
     t_settings = "सन्धिविकल्पाः"
@@ -111,22 +111,26 @@ if st.button(t_btn, type="primary"):
             result, summary, prakriya = vaakya_sandhi(input_text, settings, lang)
             
             st.subheader(t_result)
-            
-            # Native Streamlit code block for easy copying
             st.code(result, language=None)
             
-            # Integrated Aksharamukha Converter sitting cleanly below
-            st.caption(f"**{t_convert}**")
-            aksharamukha_html = f"""
-            <div style="font-family: sans-serif;">
-                <select class="aksharamukha-button" style="margin-bottom: 10px; padding: 5px; border-radius: 5px; border: 1px solid #ccc; cursor: pointer;"></select>
-                <div class="aksharamukha-text" style="font-size: 1.1em; padding: 10px; background-color: #f9f9f9; border-radius: 5px; border: 1px solid #ddd; word-wrap: break-word;">
-                    {result}
+            # Integrated Aksharamukha Converter sitting in a clean expander
+            with st.expander(t_convert):
+                aksharamukha_html = f"""
+                <div style="font-family: sans-serif; padding: 10px;">
+                    <p style="font-size: 0.9em; color: gray;">Select a script below to convert the Sandhi text.</p>
+                    <select class="aksharamukha-button" style="margin-bottom: 15px; padding: 6px; border-radius: 5px; border: 1px solid #ccc; cursor: pointer;"></select>
+                    <div class="aksharamukha-text" style="font-size: 1.1em; padding: 15px; background-color: #f9f9f9; border-radius: 5px; border: 1px solid #ddd; word-wrap: break-word;">
+                        {result}
+                    </div>
                 </div>
-            </div>
-            <script src="https://cdn.jsdelivr.net/gh/virtualvinodh/aksharamukha/aksharamukha-web-plugin/aksharamukha-v3.js?source=Devanagari&class=aksharamukha-text"></script>
-            """
-            components.html(aksharamukha_html, height=180, scrolling=True)
+                <script src="https://cdn.jsdelivr.net/gh/virtualvinodh/aksharamukha/aksharamukha-web-plugin/aksharamukha-v3.js?source=Devanagari&class=aksharamukha-text"></script>
+                """
+                # Using allow-scripts and allow-same-origin so the API can populate the dropdown list
+                components.html(
+                    aksharamukha_html, 
+                    height=250, 
+                    scrolling=True
+                )
             
             # Format DataFrames with Explicit Numbering
             if lang == "संस्कृतम्":
