@@ -92,7 +92,7 @@ jhayo_ho = st.sidebar.checkbox(t_jhayo, value=True)
 settings = {
     "remove_spaces": remove_spaces,
     "lopa_shakalyasya": lopa_shakalyasya,
-    "vaa_shari": va_shari,
+    "vaa_shari": vaa_shari,
     "jihva_upadh": jihva_upadh,
     "yaro_anunasike": yaro_anunasike,
     "shashcho_ati": shashcho_ati,
