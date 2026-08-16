@@ -4,10 +4,9 @@ from akshara.varnakaarya import get_vinyaasa, get_shabda
 from pratyaahaara import expand_pratyahaara
 from varna import avasaana
 from sutra import *
-import sutra # Imported to set module-level settings
+import sutra
 
 def vaakya_sandhi(sentence: str, settings: dict = None):
-    # Pass settings globally to Sutra.py
     sutra.ACTIVE_SETTINGS = settings or {}
 
     prakriya = pd.DataFrame(columns=["स्थिति", "सूत्र"])
@@ -63,8 +62,7 @@ def vaakya_sandhi(sentence: str, settings: dict = None):
                 elif pv[-1] in ["अ", "आ"] and sv[0] in ["ए", "ओ"] and primary in ["प्र", "अप", "अव", "उप", "परा"]:
                     df = एङि_पररूपम्(df)
                 elif (pv[-1] == sv[0] and pv[-1] in expand_pratyahaara("अक्")) or (
-                    set((pv[-1], sv[0]))
-                    in [
+                    set((pv[-1], sv[0])) in [
                         set(("अ", "आ")), set(("इ", "ई")), set(("उ", "ऊ")),
                         set(("ऋ", "ॠ")), set(("ऋ", "ऌ")), set(("ॠ", "ऌ")),
                     ]
@@ -93,7 +91,9 @@ def vaakya_sandhi(sentence: str, settings: dict = None):
                     if sv[0] in expand_pratyahaara("खर्"):
                         df = खरवसानयोर्विसर्जनीयः(df)
                     else:
-                        if pv[-2] == "अ":
+                        if primary in ["भोस्", "भगोस्", "अघोस्"]:
+                            df = भोभगोअघोअपूर्वस्य_योऽशि(df)
+                        elif pv[-2] == "अ":
                             if sv[0] == "अ":
                                 df = अतो_रोरप्लुतादप्लुते(df)
                             elif sv[0] in expand_pratyahaara("हश्"):
@@ -104,7 +104,6 @@ def vaakya_sandhi(sentence: str, settings: dict = None):
                             df = भोभगोअघोअपूर्वस्य_योऽशि(df)
                         elif sv[0] == "र्":
                             df = रो_रि(df)
-
             else:
                 if pv[-1] in expand_pratyahaara("झल्"):
                     df = झलां_जशोऽन्ते(df)
