@@ -14,10 +14,11 @@ lang = st.sidebar.radio("भाषा / Language", ["संस्कृतम्
 if lang == "संस्कृतम्":
     t_title = "सन्धीराट्"
     t_subtitle = "पाणिनीयसूत्रैः पदानि सन्धत्त ।"
-    t_img_prompt = "चित्रमस्ति चेत् <a href='https://ocr.sanskritdictionary.com/' target='_blank'>संस्कृतकोशस्य</a> साहाय्येन पाठरूपेण परिवर्त्यताम् ।"
-    t_input_label = "संस्कृतवाक्यमत्र लिख्यताम् (पदानि पृथक्कृत्य) :"
+    t_img_prompt = "चित्रमस्ति चेत् <a href='https://ocr.sanskritdictionary.com/' target='_blank'>चित्रपाठयन्त्रेण</a> पाठरूपेण परिवर्त्यताम् ।"
+    t_input_label = "पृथक्पदैः संस्कृतवाक्यमत्र लिख्यताम्"
     t_btn = "सन्धिर्विधीयताम्"
     t_result = "सन्धियुक्तरूपम्"
+    t_convert = "लिप्यन्तरणम्"
     t_summary = "सारः"
     t_prakriya = "प्रक्रिया"
     t_settings = "सन्धिविकल्पाः"
@@ -48,6 +49,7 @@ else:
     t_input_label = "Enter Sanskrit Sentence (space separated words):"
     t_btn = "Generate Sandhi"
     t_result = "Sandhi-fied text"
+    t_convert = "Script Converter"
     t_summary = "Summary"
     t_prakriya = "Prakriya (Derivation)"
     t_settings = "Sandhi Settings"
@@ -97,46 +99,44 @@ st.markdown(t_img_prompt, unsafe_allow_html=True)
 
 default_text = "अत्र अपि मुनिः उवाच भोः अच्युत तव औदार्यम् अति उत्तमम् गौः गच्छति यदि अपि सु आगतम् पितृ आज्ञा कर्तृ इह अद्य एव महा ऋषिः अस्ति। वाक् मयम् षट् मुखः तत् जलम् दिक् अन्तः जगत् ईशः पश्यति बालकः हसति नरः अत्र गै अकः पौ अकः च ने अनम् करोति। तत् लयः तत् शिवः रामः टीकते उद् डयनम् तत् चकार वृक्ष छाया किम् करोति देवाः इह अतः एव सः गच्छति एषः विष्णुः। प्र एजते उप ओषति अमी अश्वाः भानुः भाति पुनः रमते हरिः रयः कः चित् धनुः टङ्कारः निः सारः दुः खम् प्राक् नास्ति। मनस् रथः नमः ते पुनः च रामः षष्ठः बालः तरति सम् कल्पः सम् भवः चित् मयम् वाक् हरिः सुप् अन्तम्। मातुः कृपा पितुः इच्छा भ्रातुः धनम् सर्वम् अत्र अस्ति विद्वान् लिखति तान् जयेत् हसन् चकितः सम्राट् गच्छति अप् जम्। गौः अश्वः च पशोः अन्नम् नृपः जयति मुनिः ईक्षते साधुः उवाच मातृ ऋणम् च गो अग्रम् नौ इह वधु आगमनम् भवति।"
 
-input_text = st.text_area(t_input_label, value=default_text, height=150)
-
-def eng_to_devanagari(text):
-    mapping = str.maketrans('0123456789', '०१२३४५६७८९')
-    return str(text).translate(mapping)
+input_text = st.text_area(t_input_label, value=default_text, height=150, label_visibility="visible")
 
 if st.button(t_btn, type="primary"):
     if input_text.strip():
         try:
-            result, summary, prakriya = vaakya_sandhi(input_text, settings)
+            result, summary, prakriya = vaakya_sandhi(input_text, settings, lang)
             
             # Format DataFrames based on Language
             if lang == "संस्कृतम्":
                 prakriya.columns = ["स्थितिः", "सूत्रम्"]
                 summary.columns = ["पदसमूहः", "सूत्राणि", "सन्धियुक्तरूपम्"]
-                prakriya["सूत्रम्"] = prakriya["सूत्रम्"].apply(eng_to_devanagari)
-                summary["सूत्राणि"] = summary["सूत्राणि"].apply(eng_to_devanagari)
             else:
                 prakriya.columns = ["State", "Sutra"]
                 summary.columns = ["Words", "Sutras", "Sandhi Form"]
 
             st.subheader(t_result)
             
-            # Integrated Aksharamukha Web Plugin UI directly inside the app
+            # Native Streamlit code block for easy copying
+            st.code(result, language=None)
+            
+            # Integrated Aksharamukha Converter sitting cleanly below
+            st.caption(f"**{t_convert}**")
             aksharamukha_html = f"""
             <div style="font-family: sans-serif;">
-                <select class="aksharamukha-button" style="margin-bottom: 10px; padding: 5px; border-radius: 5px; cursor: pointer;"></select>
-                <div class="aksharamukha-text" style="font-size: 1.2em; padding: 15px; background-color: #f0f2f6; border-radius: 5px; word-wrap: break-word;">
+                <select class="aksharamukha-button" style="margin-bottom: 10px; padding: 5px; border-radius: 5px; border: 1px solid #ccc; cursor: pointer;"></select>
+                <div class="aksharamukha-text" style="font-size: 1.1em; padding: 10px; background-color: #f9f9f9; border-radius: 5px; border: 1px solid #ddd; word-wrap: break-word;">
                     {result}
                 </div>
             </div>
             <script src="https://cdn.jsdelivr.net/gh/virtualvinodh/aksharamukha/aksharamukha-web-plugin/aksharamukha-v3.js?source=Devanagari&class=aksharamukha-text"></script>
             """
-            components.html(aksharamukha_html, height=200, scrolling=True)
+            components.html(aksharamukha_html, height=180, scrolling=True)
             
             with st.expander(t_summary):
-                st.dataframe(summary, use_container_width=True)
+                st.dataframe(summary, use_container_width=True, hide_index=True)
             
             with st.expander(t_prakriya):
-                st.dataframe(prakriya, use_container_width=True)
+                st.dataframe(prakriya, use_container_width=True, hide_index=True)
             
         except Exception as e:
             st.error(f"Error processing text: {e}")
