@@ -125,7 +125,6 @@ if st.button(t_btn, type="primary"):
                 </div>
                 <script src="https://cdn.jsdelivr.net/gh/virtualvinodh/aksharamukha/aksharamukha-web-plugin/aksharamukha-v3.js?source=Devanagari&class=aksharamukha-text"></script>
                 """
-                # Using allow-scripts and allow-same-origin so the API can populate the dropdown list
                 components.html(
                     aksharamukha_html, 
                     height=250, 
