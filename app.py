@@ -52,3 +52,12 @@ if st.button("Generate Sandhi", type="primary"):
             st.error(f"Error processing text: {e}")
     else:
         st.warning("Please enter a valid Sanskrit sentence.")
+
+# Footer
+st.markdown("---")
+st.markdown(
+    "<div style='text-align: center; color: gray;'>"
+    "Report mistakes to <a href='mailto:samvadah@proton.me'>samvadah@proton.me</a>"
+    "</div>", 
+    unsafe_allow_html=True
+)
