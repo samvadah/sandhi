@@ -5,10 +5,6 @@ from varna import avasaana
 from sutra import *
 import sutra
 
-def eng_to_devanagari(text):
-    mapping = str.maketrans('0123456789', '०१२३४५६७८९')
-    return str(text).translate(mapping)
-
 def safe_vinyaasa(word):
     if "ॐ" in word:
         word = word.replace("ॐ", "ओम्")
@@ -23,17 +19,11 @@ def safe_shabda(vinyaasa_list):
     except:
         return "".join(vinyaasa_list)
 
-def vaakya_sandhi(sentence: str, settings: dict = None, lang: str = "संस्कृतम्"):
+def vaakya_sandhi(sentence: str, settings: dict = None):
     sutra.ACTIVE_SETTINGS = settings or {}
 
-    col_sthiti = "स्थिति"
-    col_sutra = "सूत्र"
-    col_words = "पदसमूहः" if lang == "संस्कृतम्" else "Words"
-    col_sutrani = "सूत्राणि" if lang == "संस्कृतम्" else "Sutras"
-    col_result = "सन्धियुक्तरूपम्" if lang == "संस्कृतम्" else "Sandhi Form"
-
-    prakriya = pd.DataFrame(columns=[col_sthiti, col_sutra])
-    sandhi_summary = pd.DataFrame(columns=[col_words, col_sutrani, col_result])
+    prakriya = pd.DataFrame(columns=["स्थिति", "सूत्र"])
+    sandhi_summary = pd.DataFrame(columns=["पद समूह", "सूत्राणि", "संधि-कृत रूप"])
 
     dd = []
     flag = 0
@@ -78,8 +68,8 @@ def vaakya_sandhi(sentence: str, settings: dict = None, lang: str = "संस�
             sv = safe_vinyaasa(secondary)
             if not sv: sv = []
 
-        df = pd.DataFrame(columns=[col_sthiti, col_sutra])
-        row = {col_sthiti: s, col_sutra: "-"}
+        df = pd.DataFrame(columns=["स्थिति", "सूत्र"])
+        row = {"स्थिति": s, "सूत्र": "-"}
         df = pd.concat([df, pd.DataFrame([row])], ignore_index=True)
 
         if pv and sv:
@@ -88,78 +78,78 @@ def vaakya_sandhi(sentence: str, settings: dict = None, lang: str = "संस�
                     pass
                 elif sv[0] in expand_pratyahaara("हल्"):
                     if pv[-1] in ["अ", "इ", "उ", "ऋ", "ऌ"] and sv[0] == "छ्":
-                        df = छे_च(df, col_sthiti, col_sutra)
+                        df = छे_च(df)
                 else:
                     if pv[-1] in expand_pratyahaara("एङ्") and sv[0] == "अ":
-                        df = एङः_पदान्तादति(df, col_sthiti, col_sutra)
+                        df = एङः_पदान्तादति(df)
                     elif pv[-1] in ["अ", "आ"] and sv[0] in ["ए", "ओ"] and primary in ["प्र", "अप", "अव", "उप", "परा"]:
-                        df = एङि_पररूपम्(df, col_sthiti, col_sutra)
+                        df = एङि_पररूपम्(df)
                     elif (pv[-1] == sv[0] and pv[-1] in expand_pratyahaara("अक्")) or (
                         set((pv[-1], sv[0])) in [
                             set(("अ", "आ")), set(("इ", "ई")), set(("उ", "ऊ")),
                             set(("ऋ", "ॠ")), set(("ऋ", "ऌ")), set(("ॠ", "ऌ")),
                         ]
                     ):
-                        df = अकः_सवर्णे_दीर्घः(df, col_sthiti, col_sutra)
+                        df = अकः_सवर्णे_दीर्घः(df)
                     elif pv[-1] in ["अ", "आ"] and sv[0] in expand_pratyahaara("एच्"):
-                        df = वृद्धिरेचि(df, col_sthiti, col_sutra)
+                        df = वृद्धिरेचि(df)
                     elif pv[-1] in ["अ", "आ"] and sv[0] in expand_pratyahaara("अक्"):
-                        df = आद्गुणः(df, col_sthiti, col_sutra)
+                        df = आद्गुणः(df)
                     elif pv[-1] in expand_pratyahaara("एच्") and sv[0] in expand_pratyahaara("अच्"):
-                        df = एचोऽयवायावः(df, col_sthiti, col_sutra)
+                        df = एचोऽयवायावः(df)
                     elif pv[-1] in expand_pratyahaara("इक्") and sv[0] in expand_pratyahaara("अच्"):
-                        df = इको_यणचि(df, col_sthiti, col_sutra)
+                        df = इको_यणचि(df)
             else:
                 if (
                     secondary not in avasaana
                     and (mm[ii] in ["सस्", "एषस्", "सः", "एषः"] or primary in ["सस्", "एषस्"])
                     and sv[0] in expand_pratyahaara("हल्")
                 ):
-                    df = एतत्तदोः_सुलोपोऽकोरनञ्समासे_हलि(df, col_sthiti, col_sutra)
+                    df = एतत्तदोः_सुलोपोऽकोरनञ्समासे_हलि(df)
                 elif pv[-1] == "स्":
-                    df = ससजुषो_रुः(df, col_sthiti, col_sutra)
+                    df = ससजुषो_रुः(df)
                     if secondary in avasaana:
-                        df = खरवसानयोर्विसर्जनीयः(df, col_sthiti, col_sutra)
+                        df = खरवसानयोर्विसर्जनीयः(df)
                     else:
                         if sv[0] in expand_pratyahaara("खर्"):
-                            df = खरवसानयोर्विसर्जनीयः(df, col_sthiti, col_sutra)
+                            df = खरवसानयोर्विसर्जनीयः(df)
                         else:
                             if primary in ["भोस्", "भगोस्", "अघोस्"]:
-                                df = भोभगोअघोअपूर्वस्य_योऽशि(df, col_sthiti, col_sutra)
+                                df = भोभगोअघोअपूर्वस्य_योऽशि(df)
                             elif pv[-2] == "अ":
                                 if sv[0] == "अ":
-                                    df = अतो_रोरप्लुतादप्लुते(df, col_sthiti, col_sutra)
+                                    df = अतो_रोरप्लुतादप्लुते(df)
                                 elif sv[0] in expand_pratyahaara("हश्"):
-                                    df = हशि_च(df, col_sthiti, col_sutra)
+                                    df = हशि_च(df)
                                 else:
-                                    df = भोभगोअघोअपूर्वस्य_योऽशि(df, col_sthiti, col_sutra)
+                                    df = भोभगोअघोअपूर्वस्य_योऽशि(df)
                             elif pv[-2] == "आ":
-                                df = भोभगोअघोअपूर्वस्य_योऽशि(df, col_sthiti, col_sutra)
+                                df = भोभगोअघोअपूर्वस्य_योऽशि(df)
                             elif sv[0] == "र्":
-                                df = रो_रि(df, col_sthiti, col_sutra)
+                                df = रो_रि(df)
                 else:
                     if pv[-1] in expand_pratyahaara("झल्"):
-                        df = झलां_जशोऽन्ते(df, col_sthiti, col_sutra)
+                        df = झलां_जशोऽन्ते(df)
                     elif secondary not in avasaana and pv[-1] == "र्" and sv[0] == "र्":
-                        df = रो_रि(df, col_sthiti, col_sutra)
+                        df = रो_रि(df)
                     elif pv[-1] == "र्" and (secondary in avasaana or sv[0] in expand_pratyahaara("खर्")):
-                        df = खरवसानयोर्विसर्जनीयः(df, col_sthiti, col_sutra)
+                        df = खरवसानयोर्विसर्जनीयः(df)
                     elif secondary in avasaana:
                         pass
                     elif pv[-1] == "म्" and secondary not in avasaana:
                         if sv[0] in expand_pratyahaara("हल्"):
-                            df = मोऽनुस्वारः(df, col_sthiti, col_sutra)
+                            df = मोऽनुस्वारः(df)
                     elif secondary not in avasaana and pv[-1] == "न्" and sv[0] in expand_pratyahaara("छव्"):
-                        df = नश्छव्यप्रशान्(df, col_sthiti, col_sutra)
+                        df = नश्छव्यप्रशान्(df)
                     elif secondary not in avasaana and pv[-1] == "न्" and sv[0] == "ल्":
-                        df = तोर्लि(df, col_sthiti, col_sutra)
+                        df = तोर्लि(df)
                     elif secondary not in avasaana and pv[-1] == "न्" and sv[0] in ["श्", "च्", "छ्", "ज्", "झ्", "ञ्"]:
-                        df = स्तोः_श्चुना_श्चुः(df, col_sthiti, col_sutra)
+                        df = स्तोः_श्चुना_श्चुः(df)
                     elif secondary not in avasaana and pv[-1] in expand_pratyahaara("हल्") and sv[0] in expand_pratyahaara("अच्"):
                         if pv[-1] in expand_pratyahaara("ङम्") and pv[-2] in ["अ", "इ", "उ", "ऋ", "ऌ"]:
-                            df = ङमो_ह्रस्वादचि_ङमुण्नित्यम्(df, col_sthiti, col_sutra)
+                            df = ङमो_ह्रस्वादचि_ङमुण्नित्यम्(df)
 
-        r = list(df[col_sthiti])[-1]
+        r = list(df["स्थिति"])[-1]
 
         if " " in r:
             dd.extend(safe_vinyaasa(r.split(" ")[0]) or list(r.split(" ")[0]))
@@ -176,10 +166,10 @@ def vaakya_sandhi(sentence: str, settings: dict = None, lang: str = "संस�
         if not df.empty:
             prakriya = pd.concat([prakriya, df], ignore_index=True)
 
-        sutra_list = list(df[col_sutra])
+        sutra_list = list(df["सूत्र"])
         sutra_series = " ".join(sutra_list)
 
-        row = {col_words: s, col_sutrani: sutra_series, col_result: r}
+        row = {"पद समूह": s, "सूत्राणि": sutra_series, "संधि-कृत रूप": r}
         sandhi_summary = pd.concat([sandhi_summary, pd.DataFrame([row])], ignore_index=True)
 
     if flag == 1:
@@ -232,8 +222,7 @@ def vaakya_sandhi(sentence: str, settings: dict = None, lang: str = "संस�
     ee = ee.replace(" ॥", "॥").replace("॥", " ॥ ")
     ee = " ".join(ee.split())
 
-    if lang == "संस्कृतम्":
-        prakriya[col_sutra] = prakriya[col_sutra].apply(eng_to_devanagari)
-        sandhi_summary[col_sutrani] = sandhi_summary[col_sutrani].apply(eng_to_devanagari)
+    prakriya.to_csv("prakriya.csv", index=False)
+    sandhi_summary.to_csv("sandhi_summary.csv", index=False)
 
     return [ee, sandhi_summary, prakriya]
