@@ -421,7 +421,7 @@ def लोपः_शाकल्यस्य(df):
     if " " in s:
         ii = s.index(" ")
         if s[ii - 1] in ["य्", "व्"] and s[ii + 1] in expand_pratyahaara("अच्"):
-            if ACTIVE_SETTINGS.get("lopa_shakalyasya", False):
+            if ACTIVE_SETTINGS.get("lopa_shakalyasya", True):
                 del s[ii - 1]
 
     df = post_processing(df, s, "लोपः शाकल्यस्य", "8.3.19")
@@ -432,7 +432,7 @@ def ओतो_गार्ग्यस्य(df):
     if " " in s:
         ii = s.index(" ")
         if s[ii - 1] in ["य्", "व्"] and s[ii + 1] in expand_pratyahaara("अश्"):
-            if ACTIVE_SETTINGS.get("lopa_shakalyasya", False):
+            if ACTIVE_SETTINGS.get("lopa_shakalyasya", True):
                 del s[ii - 1]
 
     df = post_processing(df, s, "ओतो गार्ग्यस्य", "8.3.20")
@@ -497,7 +497,7 @@ def शर्परे_विसर्जनीयः(df):
 def वा_शरि(df):
     s = pre_processing(df)
     if " " in s:
-        if ACTIVE_SETTINGS.get("vaa_shari", True):
+        if ACTIVE_SETTINGS.get("vaa_shari", False):
             s.remove(" ")
     df = post_processing(df, s, "वा शरि", "8.3.36")
     return df
