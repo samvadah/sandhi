@@ -92,7 +92,7 @@ jhayo_ho = st.sidebar.checkbox(t_jhayo, value=True)
 settings = {
     "remove_spaces": remove_spaces,
     "lopa_shakalyasya": lopa_shakalyasya,
-    "vaa_shari": vaa_shari,
+    "vaa_shari": va_shari,
     "jihva_upadh": jihva_upadh,
     "yaro_anunasike": yaro_anunasike,
     "shashcho_ati": shashcho_ati,
@@ -112,7 +112,7 @@ def eng_to_devanagari(text):
 if st.button(t_btn, type="primary"):
     if input_text.strip():
         try:
-            result, summary, prakriya = vaakya_sandhi(input_text, settings)
+            result, summary, prakriya = vaakya_sandhi(input_text, settings, lang)
             
             st.subheader(t_result)
             st.code(result, language=None)
