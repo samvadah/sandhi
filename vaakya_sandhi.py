@@ -5,6 +5,10 @@ from varna import avasaana
 from sutra import *
 import sutra
 
+def eng_to_devanagari(text):
+    mapping = str.maketrans('0123456789', '०१२३४५६७८९')
+    return str(text).translate(mapping)
+
 def safe_vinyaasa(word):
     if "ॐ" in word:
         word = word.replace("ॐ", "ओम्")
@@ -19,7 +23,7 @@ def safe_shabda(vinyaasa_list):
     except:
         return "".join(vinyaasa_list)
 
-def vaakya_sandhi(sentence: str, settings: dict = None):
+def vaakya_sandhi(sentence: str, settings: dict = None, lang: str = "संस्कृतम्"):
     sutra.ACTIVE_SETTINGS = settings or {}
 
     prakriya = pd.DataFrame(columns=["स्थिति", "सूत्र"])
@@ -29,7 +33,6 @@ def vaakya_sandhi(sentence: str, settings: dict = None):
     flag = 0
     temp = ""
 
-    # Strip excessive spaces and clean
     mm = [w for w in sentence.replace("ॐ", "ओम्").strip().split() if w]
     
     if not mm:
@@ -221,6 +224,11 @@ def vaakya_sandhi(sentence: str, settings: dict = None):
     ee = ee.replace(" ।", "।").replace("।", " । ")
     ee = ee.replace(" ॥", "॥").replace("॥", " ॥ ")
     ee = " ".join(ee.split())
+
+    # Map Devanagari numerals directly to dataframes before returning if in Sanskrit mode
+    if lang == "संस्कृतम्":
+        prakriya["सूत्र"] = prakriya["सूत्र"].apply(eng_to_devanagari)
+        sandhi_summary["सूत्राणि"] = sandhi_summary["सूत्राणि"].apply(eng_to_devanagari)
 
     prakriya.to_csv("prakriya.csv", index=False)
     sandhi_summary.to_csv("sandhi_summary.csv", index=False)
