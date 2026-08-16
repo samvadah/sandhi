@@ -5,6 +5,10 @@ from varna import avasaana
 from sutra import *
 import sutra
 
+def eng_to_devanagari(text):
+    mapping = str.maketrans('0123456789', '०१२३४५६७८९')
+    return str(text).translate(mapping)
+
 def safe_vinyaasa(word):
     if "ॐ" in word:
         word = word.replace("ॐ", "ओम्")
@@ -22,7 +26,7 @@ def safe_shabda(vinyaasa_list):
     except:
         return "".join(vinyaasa_list).replace("ॡ", "≍")
 
-def vaakya_sandhi(sentence: str, settings: dict = None):
+def vaakya_sandhi(sentence: str, settings: dict = None, lang: str = "संस्कृतम्"):
     sutra.ACTIVE_SETTINGS = settings or {}
 
     prakriya = pd.DataFrame(columns=["स्थिति", "सूत्र"])
@@ -153,8 +157,8 @@ def vaakya_sandhi(sentence: str, settings: dict = None):
 
         r = list(df["स्थिति"])[-1]
         
-        # Globally optionally remove space if sandhi fired
-        if sutra.ACTIVE_SETTINGS.get("remove_spaces", False) and len(df) > 1:
+        # User defined optional space removal if a Sandhi occurred
+        if settings.get("remove_spaces", False) and len(df) > 1:
             r = r.replace(" ", "")
 
         if " " in r:
@@ -223,6 +227,7 @@ def vaakya_sandhi(sentence: str, settings: dict = None):
     else:
         ee = ""
 
+    # Clean whitespace perfectly
     ee = " ".join(ee.split())
     ee = ee.replace(" ।", "।").replace(" ॥", "॥")
     ee = ee.replace("।", "। ").replace("॥", "॥ ")
