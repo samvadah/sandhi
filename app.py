@@ -101,19 +101,15 @@ default_text = "अत्र अपि मुनिः उवाच भोः �
 
 input_text = st.text_area(t_input_label, value=default_text, height=150, label_visibility="visible")
 
+def eng_to_devanagari(text):
+    mapping = str.maketrans('0123456789', '०१२३४५६७८९')
+    return str(text).translate(mapping)
+
 if st.button(t_btn, type="primary"):
     if input_text.strip():
         try:
             result, summary, prakriya = vaakya_sandhi(input_text, settings, lang)
             
-            # Format DataFrames based on Language
-            if lang == "संस्कृतम्":
-                prakriya.columns = ["स्थितिः", "सूत्रम्"]
-                summary.columns = ["पदसमूहः", "सूत्राणि", "सन्धियुक्तरूपम्"]
-            else:
-                prakriya.columns = ["State", "Sutra"]
-                summary.columns = ["Words", "Sutras", "Sandhi Form"]
-
             st.subheader(t_result)
             
             # Native Streamlit code block for easy copying
@@ -131,6 +127,26 @@ if st.button(t_btn, type="primary"):
             <script src="https://cdn.jsdelivr.net/gh/virtualvinodh/aksharamukha/aksharamukha-web-plugin/aksharamukha-v3.js?source=Devanagari&class=aksharamukha-text"></script>
             """
             components.html(aksharamukha_html, height=180, scrolling=True)
+            
+            # Format DataFrames with Explicit Numbering
+            if lang == "संस्कृतम्":
+                prakriya.columns = ["स्थितिः", "सूत्रम्"]
+                summary.columns = ["पदसमूहः", "सूत्राणि", "सन्धियुक्तरूपम्"]
+                
+                prakriya.insert(0, "क्रमः", range(1, len(prakriya) + 1))
+                summary.insert(0, "क्रमः", range(1, len(summary) + 1))
+                
+                prakriya["क्रमः"] = prakriya["क्रमः"].astype(str).apply(eng_to_devanagari)
+                summary["क्रमः"] = summary["क्रमः"].astype(str).apply(eng_to_devanagari)
+            else:
+                prakriya.columns = ["State", "Sutra"]
+                summary.columns = ["Words", "Sutras", "Sandhi Form"]
+                
+                prakriya.insert(0, "No.", range(1, len(prakriya) + 1))
+                summary.insert(0, "No.", range(1, len(summary) + 1))
+                
+                prakriya["No."] = prakriya["No."].astype(str)
+                summary["No."] = summary["No."].astype(str)
             
             with st.expander(t_summary):
                 st.dataframe(summary, use_container_width=True, hide_index=True)
