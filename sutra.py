@@ -5,7 +5,6 @@ from varna import *
 
 ACTIVE_SETTINGS = {}
 
-# MASTER WRAPPERS: Prevents 'akshara' from ever crashing on ≍ and ॐ
 def get_vinyaasa(word):
     if not word: return []
     word = str(word).replace("ॐ", "ओम्")
@@ -24,7 +23,6 @@ def get_shabda(v_list):
         return res.replace("ॡ", "≍")
     except:
         return "".join(v_list).replace("ॡ", "≍")
-
 
 def get_sthiti(df):
     return list(df["स्थिति"])[-1]
@@ -417,10 +415,19 @@ def विसर्जनीयस्य_सः(df):
         ii = s.index(" ")
         if s[ii - 1] == "ः" and (s[ii + 1] in expand_pratyahaara("छव्") or s[ii + 1] in expand_pratyahaara("शर्")):
             s = aadesh(s, ii - 1, "स्")
+            if " " in s: s.remove(" ") # Merges "रामः च" into "रामश्च"
 
     df = post_processing(df, s, "विसर्जनीयस्य सः", "8.3.34")
 
-    if " " in s:
+    if " " not in s: # Space was removed, find the newly formed conjunct
+        for jj in range(len(s) - 1):
+            if s[jj] == "स्" and (s[jj + 1] in ["च्", "छ्", "श्"] or s[jj + 1] in ["ट्", "ठ्", "ष्"]):
+                if s[jj + 1] in ["च्", "छ्", "श्"]:
+                    df = स्तोः_श्चुना_श्चुः(df)
+                elif s[jj + 1] in ["ट्", "ठ्", "ष्"]:
+                    df = ष्टुना_ष्टुः(df)
+                break
+    else:
         ii = s.index(" ")
         if s[ii - 1] == "स्":
             if s[ii + 1] in ["च्", "छ्", "श्"]:
@@ -436,9 +443,6 @@ def शर्परे_विसर्जनीयः(df):
 
 def वा_शरि(df):
     s = pre_processing(df)
-    if " " in s:
-        if ACTIVE_SETTINGS.get("vaa_shari", True):
-            s.remove(" ")
     df = post_processing(df, s, "वा शरि", "8.3.36")
     return df
 
@@ -448,45 +452,41 @@ def कुप्वोः_कपौ_च(df):
         ii = s.index(" ")
         if s[ii - 1] == "ः" and s[ii + 1] in ["क्", "ख्", "प्", "फ्"]:
             s = aadesh(s, ii - 1, "≍")
-            # Directly merge the words by removing the space to yield बाल≍क्रीडति
-            if " " in s:
-                s.remove(" ")
+            if " " in s: s.remove(" ") # Merges "बालः क्रीडति" into "बाल≍क्रीडति"
     df = post_processing(df, s, "कुप्वोः ≍क≍पौ च", "8.3.37")
     return df
 
 def स्तोः_श्चुना_श्चुः(df):
     s = pre_processing(df)
-    ii = s.index(" ")
     l1 = ["स्", "त्", "थ्", "द्", "ध्", "न्"]
     l2 = ["श्", "च्", "छ्", "ज्", "झ्", "ञ्"]
     dd = dict(zip(l1, l2))
 
-    if s[ii - 1] in l1 and s[ii + 1] in l2:
-        aa = dd[s[ii - 1]]
-        jj = ii - 1
-    if s[ii - 1] in l2 and s[ii + 1] in l1:
-        aa = dd[s[ii + 1]]
-        jj = ii + 1
+    for ii in range(1, len(s) - 1):
+        if s[ii] in l1 and s[ii + 1] in l2:
+            s = aadesh(s, ii, dd[s[ii]])
+            break
+        if s[ii] in l2 and s[ii + 1] in l1:
+            s = aadesh(s, ii + 1, dd[s[ii + 1]])
+            break
 
-    s = aadesh(s, jj, aa)
     df = post_processing(df, s, "स्तोः श्चुना श्चुः", "8.4.40")
     return df
 
 def ष्टुना_ष्टुः(df):
     s = pre_processing(df)
-    ii = s.index(" ")
     l1 = ["स्", "त्", "थ्", "द्", "ध्", "न्"]
     l2 = ["ष्", "ट्", "ठ्", "ड्", "ढ्", "ण्"]
     dd = dict(zip(l1, l2))
 
-    if s[ii - 1] in l1 and s[ii + 1] in l2:
-        aa = dd[s[ii - 1]]
-        jj = ii - 1
-    if s[ii - 1] in l2 and s[ii + 1] in l1:
-        aa = dd[s[ii + 1]]
-        jj = ii + 1
+    for ii in range(1, len(s) - 1):
+        if s[ii] in l1 and s[ii + 1] in l2:
+            s = aadesh(s, ii, dd[s[ii]])
+            break
+        if s[ii] in l2 and s[ii + 1] in l1:
+            s = aadesh(s, ii + 1, dd[s[ii + 1]])
+            break
 
-    s = aadesh(s, jj, aa)
     df = post_processing(df, s, "ष्टुना ष्टुः", "8.4.41")
     return df
 
