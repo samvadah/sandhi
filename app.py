@@ -13,15 +13,15 @@ lang = st.sidebar.radio("भाषा / Language", ["संस्कृतम्
 
 if lang == "संस्कृतम्":
     t_title = "सन्धीराट्"
-    t_subtitle = "पाणिनीयसूत्रैः पदानि सन्धत्त"
-    t_img_prompt = "चित्रमस्ति चेत् <a href='https://ocr.sanskritdictionary.com/' target='_blank'>संस्कृतकोशस्य</a> साहाय्येन पाठे परिवर्तयतु"
-    t_input_label = "संस्कृतवाक्यमत्र लिखतु"
-    t_btn = "सन्धिं कुरु"
+    t_subtitle = "पाणिनीयसूत्रैः पदानि सन्धत्त ।"
+    t_img_prompt = "चित्रमस्ति चेत् <a href='https://ocr.sanskritdictionary.com/' target='_blank'>संस्कृतकोशस्य</a> साहाय्येन पाठरूपेण परिवर्त्यताम् ।"
+    t_input_label = "संस्कृतवाक्यमत्र लिख्यताम् (पदानि पृथक्कृत्य) :"
+    t_btn = "सन्धिर्विधीयताम्"
     t_result = "सन्धियुक्तरूपम्"
     t_summary = "सारः"
     t_prakriya = "प्रक्रिया"
     t_settings = "सन्धिविकल्पाः"
-    t_warn = "कृपया योग्यं संस्कृतवाक्यं लिखतु"
+    t_warn = "कृपया शुद्धं संस्कृतवाक्यं प्रदीयताम् ।"
     t_lopa = "लोपः शाकल्यस्य (द्वावपि -> द्वा अपि)"
     t_vaa = "वा शरि (तपस्स्वाध्याय -> तपः स्वाध्याय)"
     t_jihva = "कुप्वोः ≍क≍पौ च (बालः क्रीडति -> बाल≍क्रीडति)"
@@ -30,14 +30,14 @@ if lang == "संस्कृतम्":
     t_jhayo = "झयो होऽन्यतरस्याम् (वाग् हरिः -> वाग्घरिः)"
     t_disclaimer_title = "सूचनम्"
     
-    # Sanskrit Disclaimer without English punctuation
     t_disclaimer_body = (
-        "<strong>पदान्तसन्धिरेवायम्</strong> अयं तन्त्रांशः पृथक्पदानां सन्धये एव निर्मितः न तु पदान्तर्गतसन्धये यथा ने अनम् नयनम्<br><br>"
-        "<strong>दर्शनदोषः</strong> विद्वाल्ँलिखति इति शुद्धरूपं तथापि टङ्कणयन्त्रस्य दर्शनदोषवशात् विद्वाँल्लिखति इति प्रदर्श्यते<br><br>"
-        "<strong>अष्टाध्यायीपूर्णता</strong> अयं तन्त्रांशः प्रायः सर्वानपि शास्त्रीयसन्धीन् करोति तथापि अष्टाध्याय्यां सहस्राधिकानि सूत्राणि सन्ति अतः केचन वैदिकसन्धयः अपवादसन्धयः च अग्रे योजयिष्यन्ते<br><br>"
+        "<strong>पदान्तसन्धिरेवायम्</strong> अयं तन्त्रांशः पृथक्पदानां सन्धये एव निर्मितः न तु पदान्तर्गतसन्धये यथा ने अनम् नयनम् ।<br><br>"
+        "<strong>दर्शनदोषः</strong> विद्वाल्ँलिखति इति शुद्धरूपं तथापि टङ्कणयन्त्रस्य दर्शनदोषवशात् विद्वाँल्लिखति इति प्रदर्श्यते ।<br><br>"
+        "<strong>अष्टाध्यायीपूर्णता</strong> अयं तन्त्रांशः प्रायः सर्वानपि शास्त्रीयसन्धीन् करोति तथापि अष्टाध्याय्यां सहस्राधिकानि सूत्राणि सन्ति अतः केचन वैदिकसन्धयः अपवादसन्धयः च अग्रे योजयिष्यन्ते ।<br><br>"
+        "<strong>दोषावलोकनम्</strong> यत्र कुत्रापि दोषाः दृश्यन्ते सद्य एव विद्युत्पत्रेण गिड्ढब्जालस्थले वा सूच्यताम् ।<br><br>"
         "<div style='text-align: center; margin-top: 15px;'>"
         "<a href='mailto:samvadah@proton.me' style='text-decoration: none; padding: 5px 10px; background-color: #f0f2f6; border-radius: 5px; color: black; margin-right: 10px;'>विद्युत्पत्रम्</a>"
-        "<a href='https://github.com/samvadah/sandhi/issues' target='_blank' style='text-decoration: none; padding: 5px 10px; background-color: #f0f2f6; border-radius: 5px; color: black;'>गिट्हब्-जालस्थानम्</a>"
+        "<a href='https://github.com/samvadah/sandhi/issues' target='_blank' style='text-decoration: none; padding: 5px 10px; background-color: #f0f2f6; border-radius: 5px; color: black;'>गिड्ढब्जालस्थलम्</a>"
         "</div>"
     )
 
@@ -64,6 +64,7 @@ else:
         "<strong>External Sandhi Only:</strong> This tool is meant for external sandhi (पदान्त) between separate words. It is not designed for internal sandhi (अपदान्त) like <em>ने + अनं = नयनं</em>.<br><br>"
         "<strong>Rendering Note:</strong> Correct forms are like विद्वाल्ँलिखति but we show विद्वाँल्लिखति due to standard font rendering limitations.<br><br>"
         "<strong>Ashtadhyayi Completeness:</strong> While this engine covers the vast majority of classical Sandhi rules (अच्, हल्, विसर्ग), Panini's Ashtadhyayi contains over 4,000 sutras. Rare exceptions, Vedic rules, and specific word-bound sandhis may still be added in the future to make it absolutely perfect.<br><br>"
+        "<strong>Report Mistakes:</strong> If you spot any mistakes, please report them immediately to the email or GitHub issues below.<br><br>"
         "<div style='text-align: center; margin-top: 15px;'>"
         "<a href='mailto:samvadah@proton.me' style='text-decoration: none; padding: 5px 10px; background-color: #f0f2f6; border-radius: 5px; color: black; margin-right: 10px;'>Report via Mail</a>"
         "<a href='https://github.com/samvadah/sandhi/issues' target='_blank' style='text-decoration: none; padding: 5px 10px; background-color: #f0f2f6; border-radius: 5px; color: black;'>Open GitHub Issue</a>"
@@ -98,11 +99,25 @@ default_text = "अत्र अपि मुनिः उवाच भोः �
 
 input_text = st.text_area(t_input_label, value=default_text, height=150)
 
+def eng_to_devanagari(text):
+    mapping = str.maketrans('0123456789', '०१२३४५६७८९')
+    return str(text).translate(mapping)
+
 if st.button(t_btn, type="primary"):
     if input_text.strip():
         try:
-            result, summary, prakriya = vaakya_sandhi(input_text, settings, lang)
+            result, summary, prakriya = vaakya_sandhi(input_text, settings)
             
+            # Format DataFrames based on Language
+            if lang == "संस्कृतम्":
+                prakriya.columns = ["स्थितिः", "सूत्रम्"]
+                summary.columns = ["पदसमूहः", "सूत्राणि", "सन्धियुक्तरूपम्"]
+                prakriya["सूत्रम्"] = prakriya["सूत्रम्"].apply(eng_to_devanagari)
+                summary["सूत्राणि"] = summary["सूत्राणि"].apply(eng_to_devanagari)
+            else:
+                prakriya.columns = ["State", "Sutra"]
+                summary.columns = ["Words", "Sutras", "Sandhi Form"]
+
             st.subheader(t_result)
             
             # Integrated Aksharamukha Web Plugin UI directly inside the app
