@@ -10,21 +10,23 @@ def eng_to_devanagari(text):
     return str(text).translate(mapping)
 
 def safe_vinyaasa(word):
-    if "ॐ" in word:
-        word = word.replace("ॐ", "ओम्")
+    if not word: return []
+    word = str(word).replace("ॐ", "ओम्")
+    # Dual sentinel masking for ≍ and ZWNJ
+    temp = word.replace("≍", "ॡ").replace("\u200c", "ॣ")
     try:
-        temp_word = word.replace("≍", "ॡ")
-        v = _orig_get_vinyaasa(temp_word)
-        return ["≍" if x == "ॡ" else x for x in v]
+        v = _orig_get_vinyaasa(temp)
+        return ["≍" if x == "ॡ" else ("\u200c" if x == "ॣ" else x) for x in v]
     except:
-        return None
+        return list(word)
 
 def safe_shabda(vinyaasa_list):
     try:
-        temp_list = ["ॡ" if x == "≍" else x for x in vinyaasa_list]
-        return _orig_get_shabda(temp_list).replace("ॡ", "≍")
+        temp = ["ॡ" if x == "≍" else ("ॣ" if x == "\u200c" else x) for x in vinyaasa_list]
+        res = _orig_get_shabda(temp)
+        return res.replace("ॡ", "≍").replace("ॣ", "\u200c")
     except:
-        return "".join(vinyaasa_list).replace("ॡ", "≍")
+        return "".join(vinyaasa_list).replace("ॡ", "≍").replace("ॣ", "\u200c")
 
 def vaakya_sandhi(sentence: str, settings: dict = None, lang: str = "संस्कृतम्"):
     sutra.ACTIVE_SETTINGS = settings or {}
@@ -157,13 +159,19 @@ def vaakya_sandhi(sentence: str, settings: dict = None, lang: str = "संस�
 
         r = list(df["स्थिति"])[-1]
         
-        # User defined optional space removal if a Sandhi occurred
-        if settings.get("remove_spaces", False) and len(df) > 1:
-            r = r.replace(" ", "")
+        if settings.get("remove_spaces", False) and len(df) > 1 and " " in r:
+            r = r.replace(" ", "\u200c")
 
-        if " " in r:
-            dd.extend(safe_vinyaasa(r.split(" ")[0]) or list(r.split(" ")[0]))
-            dd.append(" ")
+        if " " in r or "\u200c" in r:
+            separator = " " if " " in r else "\u200c"
+            part1 = r.split(separator)[0]
+            part2 = r.split(separator)[1]
+            
+            dd.extend(safe_vinyaasa(part1) or list(part1))
+            dd.append(separator)
+            
+            temp = part2
+            flag = 1
         else:
             if secondary in avasaana:
                 dd.extend(safe_vinyaasa(r) or list(r))
@@ -227,7 +235,6 @@ def vaakya_sandhi(sentence: str, settings: dict = None, lang: str = "संस�
     else:
         ee = ""
 
-    # Clean whitespace perfectly
     ee = " ".join(ee.split())
     ee = ee.replace(" ।", "।").replace(" ॥", "॥")
     ee = ee.replace("।", "। ").replace("॥", "॥ ")
