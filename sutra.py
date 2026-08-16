@@ -5,28 +5,26 @@ from varna import *
 
 ACTIVE_SETTINGS = {}
 
-# ----------------- WRAPPER UTILS -----------------
 def get_vinyaasa(word):
     if not word: return []
     word = str(word).replace("ॐ", "ओम्")
-    temp = word.replace("≍", "ॡ")
+    temp = word.replace("≍", "ॡ").replace("\u200c", "ॣ")
     try:
         v = _orig_get_vinyaasa(temp)
-        return ["≍" if x == "ॡ" else x for x in v]
+        return ["≍" if x == "ॡ" else ("\u200c" if x == "ॣ" else x) for x in v]
     except:
         return list(word)
 
 def get_shabda(v_list):
     if not v_list: return ""
-    temp = ["ॡ" if x == "≍" else x for x in v_list]
+    temp = ["ॡ" if x == "≍" else ("ॣ" if x == "\u200c" else x) for x in v_list]
     try:
         res = _orig_get_shabda(temp)
-        return res.replace("ॡ", "≍")
+        return res.replace("ॡ", "≍").replace("ॣ", "\u200c")
     except:
-        return "".join(v_list).replace("ॡ", "≍")
+        return "".join(v_list).replace("ॡ", "≍").replace("ॣ", "\u200c")
 
 def get_boundary(s):
-    """Safely finds the boundary space separating two words during conjugation."""
     if " " in s:
         return len(s) - 1 - s[::-1].index(" ")
     return -1
@@ -57,8 +55,6 @@ def post_processing(df, s, name, number):
     df = pd.concat([df, pd.DataFrame([row])], ignore_index=True)
     return df
 
-
-# ----------------- SUTRAS -----------------
 def तस्य_लोपः(df, ii):
     s = pre_processing(df)
     del s[ii]
@@ -210,8 +206,7 @@ def एङि_पररूपम्(df):
         temp = s[ii + 1]
         del s[ii + 1]
         s = aadesh(s, ii - 1, temp)
-        if " " in s:
-            s.remove(" ")
+        if " " in s: s.remove(" ")
     df = post_processing(df, s, "एङि पररूपम्", "6.1.94")
     return df
 
@@ -220,7 +215,7 @@ def छे_च(df):
     ii = get_boundary(s)
     if ii != -1:
         s.insert(ii, "च्")
-        s.remove(" ")
+        if " " in s: s.remove(" ")
     df = post_processing(df, s, "छे च", "6.1.73")
     return df
 
@@ -248,7 +243,7 @@ def झलां_जशोऽन्ते(df):
     ii = get_boundary(s)
     if ii != -1:
         if s[ii - 1] in expand_pratyahaara("झल्"):
-            aa = s[ii - 1] # Fallback initialisation prevents UnboundLocalError
+            aa = s[ii - 1]
             word_str = get_shabda(s[:ii])
             if word_str.endswith("राज्") or word_str.endswith("भ्राज्"): aa = "ड्" 
             elif s[ii - 1] in ["च्", "छ्", "ज्", "झ्"]: aa = "ग्"
@@ -274,7 +269,6 @@ def झलां_जशोऽन्ते(df):
 
     df = post_processing(df, s, "झलां जशोऽन्ते", "8.2.39")
 
-    # Follow up Sandhis
     if " " in s:
         ii = get_boundary(s)
         l1 = ["स्", "त्", "थ्", "द्", "ध्", "न्"]
@@ -305,16 +299,16 @@ def झलां_जशोऽन्ते(df):
 def ससजुषो_रुः(df):
     s = pre_processing(df)
     ii = get_boundary(s)
+    target_idx = -1
     if ii != -1 and s[ii - 1] == "स्": 
         target_idx = ii - 1
     elif s[-1] == "स्": 
         target_idx = len(s) - 1
-    else:
-        return df
-
-    s = aadesh(s, target_idx, "रुँ")
-    df = post_processing(df, s, "ससजुषो रुः", "8.2.66")
-    df = तस्य_लोपः(df, target_idx + 1)
+        
+    if target_idx != -1:
+        s = aadesh(s, target_idx, "रुँ")
+        df = post_processing(df, s, "ससजुषो रुः", "8.2.66")
+        df = तस्य_लोपः(df, target_idx + 1)
     return df
 
 def नश्छव्यप्रशान्(df):
@@ -386,8 +380,6 @@ def लोपः_शाकल्यस्य(df):
         if s[ii - 1] in ["य्", "व्"] and s[ii + 1] in expand_pratyahaara("अच्"):
             if ACTIVE_SETTINGS.get("lopa_shakalyasya", True):
                 del s[ii - 1]
-            else:
-                s.remove(" ")
 
     df = post_processing(df, s, "लोपः शाकल्यस्य", "8.3.19")
     return df
@@ -399,8 +391,6 @@ def ओतो_गार्ग्यस्य(df):
         if s[ii - 1] in ["य्", "व्"] and s[ii + 1] in expand_pratyahaara("अश्"):
             if ACTIVE_SETTINGS.get("lopa_shakalyasya", True):
                 del s[ii - 1]
-            else:
-                s.remove(" ")
 
     df = post_processing(df, s, "ओतो गार्ग्यस्य", "8.3.20")
     return df
@@ -438,13 +428,10 @@ def विसर्जनीयस्य_सः(df):
     if ii != -1:
         if s[ii - 1] == "ः" and (s[ii + 1] in expand_pratyahaara("छव्") or s[ii + 1] in expand_pratyahaara("शर्")):
             s = aadesh(s, ii - 1, "स्")
-            # Drop space so it natively merges into words like रामश्च / कश्चित्
-            if s[ii] == " ":
-                del s[ii]
+            if " " in s: s.remove(" ")
 
     df = post_processing(df, s, "विसर्जनीयस्य सः", "8.3.34")
 
-    # Native string traversal for follow-up rules since the space is gone
     s = pre_processing(df)
     for jj in range(len(s) - 1):
         if s[jj] == "स्":
@@ -453,7 +440,6 @@ def विसर्जनीयस्य_सः(df):
             elif s[jj + 1] in ["ट्", "ठ्", "ष्"]:
                 df = ष्टुना_ष्टुः(df)
             break
-            
     return df
 
 def शर्परे_विसर्जनीयः(df):
@@ -463,11 +449,8 @@ def शर्परे_विसर्जनीयः(df):
 
 def वा_शरि(df):
     s = pre_processing(df)
-    ii = get_boundary(s)
-    if ii != -1:
-        if ACTIVE_SETTINGS.get("vaa_shari", True):
-            if s[ii] == " ":
-                del s[ii]
+    if ACTIVE_SETTINGS.get("vaa_shari", True):
+        if " " in s: s.remove(" ")
     df = post_processing(df, s, "वा शरि", "8.3.36")
     return df
 
@@ -477,8 +460,7 @@ def कुप्वोः_कपौ_च(df):
     if ii != -1:
         if s[ii - 1] == "ः" and s[ii + 1] in ["क्", "ख्", "प्", "फ्"]:
             s = aadesh(s, ii - 1, "≍")
-            if s[ii] == " ":
-                del s[ii]
+            if " " in s: s.remove(" ")
     df = post_processing(df, s, "कुप्वोः ≍क≍पौ च", "8.3.37")
     return df
 
@@ -488,15 +470,13 @@ def स्तोः_श्चुना_श्चुः(df):
     l2 = ["श्", "च्", "छ्", "ज्", "झ्", "ञ्"]
     dd = dict(zip(l1, l2))
 
-    # Cross-space boundary check
     ii = get_boundary(s)
     if ii != -1:
         if s[ii - 1] in l1 and s[ii + 1] in l2:
             s = aadesh(s, ii - 1, dd[s[ii - 1]])
         elif s[ii - 1] in l2 and s[ii + 1] in l1:
             s = aadesh(s, ii + 1, dd[s[ii + 1]])
-            
-    # Direct adjacency check (for natively merged words like रामश्च)
+
     for jj in range(len(s) - 1):
         if s[jj] in l1 and s[jj + 1] in l2:
             s = aadesh(s, jj, dd[s[jj]])
@@ -544,8 +524,8 @@ def यरोऽनुनासिकेऽनुनासिको_वा(df):
                 elif s[ii - 1] == "ड्": aa = "ण्"
                 elif s[ii - 1] == "द्": aa = "न्"
                 elif s[ii - 1] == "ब्": aa = "म्"
-                s = aadesh(s, ii - 1, aa)
 
+                s = aadesh(s, ii - 1, aa)
             df = post_processing(df, s, "यरोऽनुनासिकेऽनुनासिको वा", "8.4.45")
     return df
 
@@ -554,7 +534,7 @@ def खरि_च(df):
     ii = get_boundary(s)
     if ii != -1:
         if s[ii - 1] in expand_pratyahaara("झल्") and s[ii + 1] in expand_pratyahaara("खर्"):
-            aa = s[ii - 1] # Fallback prevents UnboundLocalError
+            aa = s[ii - 1]
             if s[ii - 1] in ["क्", "ख्", "ग्", "घ्"]: aa = "क्"
             elif s[ii - 1] in ["च्", "छ्", "ज्", "झ्"]: aa = "च्"
             elif s[ii - 1] in ["ट्", "ठ्", "ड्", "ढ्"]: aa = "ट्"
@@ -567,7 +547,6 @@ def खरि_च(df):
 
         if (s[ii - 1] in expand_pratyahaara("झय्") and s[ii + 1] == "श्" and s[ii + 2] in expand_pratyahaara("अम्")):
             df = शशछोऽटि(df)
-
     return df
 
 def वाऽवसाने(df):
@@ -601,10 +580,10 @@ def तोर्लि(df):
                 if vowel_idx != -1:
                     s.insert(vowel_idx + 1, "ँ")
                     
-                if s[ii] == " ": 
-                    del s[ii]
+                if " " in s: s.remove(" ")
             else:
                 s = aadesh(s, ii - 1, "ल्")
+                if " " in s: s.remove(" ")
             df = post_processing(df, s, "तोर्लि", "8.4.60")
     return df
 
@@ -641,20 +620,14 @@ def शशछोऽटि(df):
 
 if __name__ == "__main__":
     df = pd.DataFrame(columns=["स्थिति", "सूत्र"])
-
     word1 = "समवेतास्"
     word2 = "जपि"
-
     v1 = get_vinyaasa(word1)
     v2 = get_vinyaasa(word2)
-
     word3 = word1 + " " + word2
-
     row = {"स्थिति": word3, "सूत्र": "-"}
     df = pd.concat([df, pd.DataFrame([row])], ignore_index=True)
-
     v3 = get_vinyaasa(word3)
-
     df = ससजुषो_रुः(df)
 
     s = pre_processing(df)
@@ -674,5 +647,4 @@ if __name__ == "__main__":
                 df = भोभगोअघोअपूर्वस्य_योऽशि(df)
     else:
         df = खरवसानयोर्विसर्जनीयः(df)
-
     print(df)
