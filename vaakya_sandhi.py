@@ -1,31 +1,33 @@
 import pandas as pd
-from akshara.varnakaarya import get_vinyaasa, get_shabda
+from akshara.varnakaarya import get_vinyaasa as _orig_get_vinyaasa, get_shabda as _orig_get_shabda
 from pratyaahaara import expand_pratyahaara
 from varna import avasaana
 from sutra import *
 import sutra
 
+# SAFE WRAPPERS: Completely shields akshara from seeing ≍ or ॐ
+def get_vinyaasa(word):
+    if not word: return []
+    word = str(word).replace("ॐ", "ओम्")
+    temp = word.replace("≍", "ॡ")
+    try:
+        v = _orig_get_vinyaasa(temp)
+        return ["≍" if x == "ॡ" else x for x in v]
+    except:
+        return list(word)
+
+def get_shabda(v_list):
+    if not v_list: return ""
+    temp = ["ॡ" if x == "≍" else x for x in v_list]
+    try:
+        res = _orig_get_shabda(temp)
+        return res.replace("ॡ", "≍")
+    except:
+        return "".join(v_list).replace("ॡ", "≍")
+
 def eng_to_devanagari(text):
     mapping = str.maketrans('0123456789', '०१२३४५६७८९')
     return str(text).translate(mapping)
-
-def safe_vinyaasa(word):
-    if "ॐ" in word:
-        word = word.replace("ॐ", "ओम्")
-    try:
-        # Use ॡ as sentinel token so normal ः is never affected
-        temp_word = word.replace("≍", "ॡ")
-        v = get_vinyaasa(temp_word)
-        return ["≍" if x == "ॡ" else x for x in v]
-    except:
-        return None
-
-def safe_shabda(vinyaasa_list):
-    try:
-        temp_list = ["ॡ" if x == "≍" else x for x in vinyaasa_list]
-        return get_shabda(temp_list).replace("ॡ", "≍")
-    except:
-        return "".join(vinyaasa_list)
 
 def vaakya_sandhi(sentence: str, settings: dict = None, lang: str = "संस्कृतम्"):
     sutra.ACTIVE_SETTINGS = settings or {}
@@ -49,7 +51,7 @@ def vaakya_sandhi(sentence: str, settings: dict = None, lang: str = "संस�
             flag = 0
             primary = temp
 
-        pv = safe_vinyaasa(primary)
+        pv = get_vinyaasa(primary)
         if not pv:
             dd.append(primary)
             dd.append(" ")
@@ -57,10 +59,10 @@ def vaakya_sandhi(sentence: str, settings: dict = None, lang: str = "संस�
 
         if primary[-1] == "ः":
             if primary in ["पुनः", "प्रातः", "अन्तः", "स्वः"]:
-                primary = safe_shabda(safe_vinyaasa(primary[:-1] + "र्"))
+                primary = get_shabda(get_vinyaasa(primary[:-1] + "र्"))
             else:
-                primary = safe_shabda(safe_vinyaasa(primary[:-1] + "स्"))
-            pv = safe_vinyaasa(primary)
+                primary = get_shabda(get_vinyaasa(primary[:-1] + "स्"))
+            pv = get_vinyaasa(primary)
 
         if primary in avasaana:
             continue
@@ -72,8 +74,7 @@ def vaakya_sandhi(sentence: str, settings: dict = None, lang: str = "संस�
             sv = []
         else:
             s = primary + " " + secondary
-            sv = safe_vinyaasa(secondary)
-            if not sv: sv = []
+            sv = get_vinyaasa(secondary)
 
         df = pd.DataFrame(columns=["स्थिति", "सूत्र"])
         row = {"स्थिति": s, "सूत्र": "-"}
@@ -159,11 +160,11 @@ def vaakya_sandhi(sentence: str, settings: dict = None, lang: str = "संस�
         r = list(df["स्थिति"])[-1]
 
         if " " in r:
-            dd.extend(safe_vinyaasa(r.split(" ")[0]) or list(r.split(" ")[0]))
+            dd.extend(get_vinyaasa(r.split(" ")[0]))
             dd.append(" ")
         else:
             if secondary in avasaana:
-                dd.extend(safe_vinyaasa(r) or list(r))
+                dd.extend(get_vinyaasa(r))
                 dd.append(" ")
                 dd.append(secondary)
             else:
@@ -180,20 +181,20 @@ def vaakya_sandhi(sentence: str, settings: dict = None, lang: str = "संस�
         sandhi_summary = pd.concat([sandhi_summary, pd.DataFrame([row])], ignore_index=True)
 
     if flag == 1:
-        dd.extend(safe_vinyaasa(temp) or list(temp))
+        dd.extend(get_vinyaasa(temp))
         dd.append(" ")
     elif len(mm) > 0:
         last_word = mm[-1]
         if last_word not in avasaana:
             if not any(last_word.endswith(av) for av in avasaana if av != " "):
-                dd.extend(safe_vinyaasa(last_word) or list(last_word))
+                dd.extend(get_vinyaasa(last_word))
                 dd.append(" ")
             else:
                 for av in avasaana:
                     if av != " " and last_word.endswith(av):
                         word_part = last_word[: -len(av)]
                         if word_part:
-                            dd.extend(safe_vinyaasa(word_part) or list(word_part))
+                            dd.extend(get_vinyaasa(word_part))
                             dd.append(" ")
                         dd.append(av)
                         break
@@ -220,13 +221,15 @@ def vaakya_sandhi(sentence: str, settings: dict = None, lang: str = "संस�
                     i += 1
             i += 1
 
-        ee = safe_shabda(ee)
+        ee = get_shabda(ee)
     else:
         ee = ""
 
     ee = " ".join(ee.split())
-    ee = ee.replace(" ।", "।").replace("।", " । ")
-    ee = ee.replace(" ॥", "॥").replace("॥", " ॥ ")
+    # Snaps Danda backward so it formats cleanly (रामः अत्र अस्ति।)
+    ee = ee.replace(" ।", "।").replace(" ॥", "॥")
+    # Add trailing space after Danda to be safe
+    ee = ee.replace("।", "। ").replace("॥", "॥ ")
     ee = " ".join(ee.split())
 
     if lang == "संस्कृतम्":
