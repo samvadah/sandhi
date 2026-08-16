@@ -26,22 +26,14 @@ def aadesh(s, ii, aa):
 
 def pre_processing(df):
     raw = list(df["स्थिति"])[-1]
-    try:
-        return get_vinyaasa(raw)
-    except:
-        # Mask ≍ so akshara does not throw Illegal Varna
-        temp_raw = raw.replace("≍", "ः")
-        v = get_vinyaasa(temp_raw)
-        return ["≍" if x == "ः" else x for x in v]
+    # Use ॡ as sentinel token so normal ः is never affected
+    temp_raw = raw.replace("≍", "ॡ")
+    v = get_vinyaasa(temp_raw)
+    return ["≍" if x == "ॡ" else x for x in v]
 
 def post_processing(df, s, name, number):
-    try:
-        s_str = get_shabda(s)
-    except:
-        # Mask ≍ before get_shabda, then restore it
-        temp_s = ["ः" if x == "≍" else x for x in s]
-        s_str = get_shabda(temp_s).replace("ः", "≍")
-        
+    temp_s = ["ॡ" if x == "≍" else x for x in s]
+    s_str = get_shabda(temp_s).replace("ॡ", "≍")
     t = "[[" + name + " (" + number + ")]]"
     row = {"स्थिति": s_str, "सूत्र": t}
     df = pd.concat([df, pd.DataFrame([row])], ignore_index=True)
@@ -351,7 +343,8 @@ def भोभगोअघोअपूर्वस्य_योऽशि(df):
         elif s[ii - 2] == "ओ":
             df = ओतो_गार्ग्यस्य(df)
         else:
-            df = लोपः_शाकल्यस्य(df)
+            if ACTIVE_SETTINGS.get("lopa_shakalyasya", True):
+                df = लोपः_शाकल्यस्य(df)
 
     return df
 
@@ -442,8 +435,7 @@ def कुप्वोः_कपौ_च(df):
     if " " in s:
         ii = s.index(" ")
         if s[ii - 1] == "ः" and s[ii + 1] in ["क्", "ख्", "प्", "फ्"]:
-            if ACTIVE_SETTINGS.get("jihva_upadh", False):
-                s = aadesh(s, ii - 1, "≍")
+            s = aadesh(s, ii - 1, "≍")
     df = post_processing(df, s, "कुप्वोः ≍क≍पौ च", "8.3.37")
     return df
 
@@ -587,8 +579,6 @@ if __name__ == "__main__":
 
     word1 = "समवेतास्"
     word2 = "जपि"
-    # word1 = 'भगोस्'
-    # word2 = 'अपि'
 
     v1 = get_vinyaasa(word1)
     v2 = get_vinyaasa(word2)
