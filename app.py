@@ -13,9 +13,9 @@ lang = st.sidebar.radio("भाषा / Language", ["संस्कृतम्
 
 if lang == "संस्कृतम्":
     t_title = "सन्धीराट्"
-    t_subtitle = "पाणिनीयसूत्रैः पदानि सन्धत्त।"
-    t_img_prompt = "चित्रमस्ति चेत् <a href='https://ocr.sanskritdictionary.com/' target='_blank'>चित्रपाठयन्त्रेण</a> पाठरूपेण परिवर्त्यताम्।"
-    t_input_label = "पृथक्पदैः संस्कृतवाक्यमत्र लिख्यताम्।"
+    t_subtitle = "पाणिनीयसूत्रैः पदानि सन्धत्त ।"
+    t_img_prompt = "चित्रमस्ति चेत् <a href='https://ocr.sanskritdictionary.com/' target='_blank'>चित्रपाठयन्त्रेण</a> पाठरूपेण परिवर्त्यताम् ।"
+    t_input_label = "पृथक्पदैः संस्कृतवाक्यमत्र लिख्यताम्"
     t_btn = "सन्धिर्विधीयताम्"
     t_result = "सन्धियुक्तरूपम्"
     t_convert = "लिप्यन्तरणम्"
@@ -23,6 +23,7 @@ if lang == "संस्कृतम्":
     t_prakriya = "प्रक्रिया"
     t_settings = "सन्धिविकल्पाः"
     t_warn = "कृपया शुद्धं संस्कृतवाक्यं प्रदीयताम् ।"
+    t_remove_spaces = "सन्धियुक्तपदानां मध्ये रिक्तस्थानं मास्तु (रामो राजा -> रामोराजा)"
     t_lopa = "लोपः शाकल्यस्य (द्वावपि -> द्वा अपि)"
     t_vaa = "वा शरि (तपस्स्वाध्याय -> तपः स्वाध्याय)"
     t_jihva = "कुप्वोः ≍क≍पौ च (बालः क्रीडति -> बाल≍क्रीडति)"
@@ -32,10 +33,10 @@ if lang == "संस्कृतम्":
     t_disclaimer_title = "सूचनम्"
     
     t_disclaimer_body = (
-        "<strong>पदान्तसन्धिरेवायम्।</strong> अयं तन्त्रांशः पृथक्पदानां सन्धये एव निर्मितः न तु पदान्तर्गतसन्धये यथा ने अनम् नयनम् ।<br><br>"
-        "<strong>दर्शनदोषः।</strong> विद्वाल्ँलिखति इति शुद्धरूपं तथापि टङ्कणयन्त्रस्य दर्शनदोषवशात् विद्वाँल्लिखति इति प्रदर्श्यते ।<br><br>"
-        "<strong>अष्टाध्यायीपूर्णता।</strong> अयं तन्त्रांशः प्रायः सर्वानपि शास्त्रीयसन्धीन् करोति तथापि अष्टाध्याय्यां सहस्राधिकानि सूत्राणि सन्ति अतः केचन वैदिकसन्धयः अपवादसन्धयः च अग्रे योजयिष्यन्ते ।<br><br>"
-        "<strong>दोषावलोकनम्।</strong> यत्र कुत्रापि दोषाः दृश्यन्ते सद्य एव विद्युत्पत्रेण गिड्ढब्जालस्थले वा सूच्यताम् ।<br><br>"
+        "<strong>पदान्तसन्धिरेवायम्</strong> अयं तन्त्रांशः पृथक्पदानां सन्धये एव निर्मितः न तु पदान्तर्गतसन्धये यथा ने अनम् नयनम् ।<br><br>"
+        "<strong>दर्शनदोषः</strong> विद्वाल्ँलिखति इति शुद्धरूपं तथापि टङ्कणयन्त्रस्य दर्शनदोषवशात् विद्वाँल्लिखति इति प्रदर्श्यते ।<br><br>"
+        "<strong>अष्टाध्यायीपूर्णता</strong> अयं तन्त्रांशः प्रायः सर्वानपि शास्त्रीयसन्धीन् करोति तथापि अष्टाध्याय्यां सहस्राधिकानि सूत्राणि सन्ति अतः केचन वैदिकसन्धयः अपवादसन्धयः च अग्रे योजयिष्यन्ते ।<br><br>"
+        "<strong>दोषावलोकनम्</strong> यत्र कुत्रापि दोषाः दृश्यन्ते सद्य एव विद्युत्पत्रेण गिड्ढब्जालस्थले वा सूच्यताम् ।<br><br>"
         "<div style='text-align: center; margin-top: 15px;'>"
         "<a href='mailto:samvadah@proton.me' style='text-decoration: none; padding: 5px 10px; background-color: #f0f2f6; border-radius: 5px; color: black; margin-right: 10px;'>विद्युत्पत्रम्</a>"
         "<a href='https://github.com/samvadah/sandhi/issues' target='_blank' style='text-decoration: none; padding: 5px 10px; background-color: #f0f2f6; border-radius: 5px; color: black;'>गिड्ढब्जालस्थलम्</a>"
@@ -54,6 +55,7 @@ else:
     t_prakriya = "Prakriya (Derivation)"
     t_settings = "Sandhi Settings"
     t_warn = "Please enter a valid Sanskrit sentence."
+    t_remove_spaces = "Remove spaces between sandhified words (e.g., रामो राजा -> रामोराजा)"
     t_lopa = "Apply लोपः शाकल्यस्य (e.g., द्वावपि -> द्वा अपि)"
     t_vaa = "Apply वा शरि (e.g., तपस्स्वाध्याय -> तपः स्वाध्याय)"
     t_jihva = "Apply कुप्वोः ≍क≍पौ च (e.g., बालः क्रीडति -> बाल≍क्रीडति)"
@@ -79,6 +81,7 @@ st.markdown(t_subtitle)
 # Sidebar Settings
 st.sidebar.header(t_settings)
 
+remove_spaces = st.sidebar.checkbox(t_remove_spaces, value=False)
 lopa_shakalyasya = st.sidebar.checkbox(t_lopa, value=True)
 vaa_shari = st.sidebar.checkbox(t_vaa, value=True)
 jihva_upadh = st.sidebar.checkbox(t_jihva, value=False)
@@ -87,6 +90,7 @@ shashcho_ati = st.sidebar.checkbox(t_shashcho, value=True)
 jhayo_ho = st.sidebar.checkbox(t_jhayo, value=True)
 
 settings = {
+    "remove_spaces": remove_spaces,
     "lopa_shakalyasya": lopa_shakalyasya,
     "vaa_shari": vaa_shari,
     "jihva_upadh": jihva_upadh,
@@ -108,12 +112,11 @@ def eng_to_devanagari(text):
 if st.button(t_btn, type="primary"):
     if input_text.strip():
         try:
-            result, summary, prakriya = vaakya_sandhi(input_text, settings, lang)
+            result, summary, prakriya = vaakya_sandhi(input_text, settings)
             
             st.subheader(t_result)
             st.code(result, language=None)
             
-            # Integrated Aksharamukha Converter sitting in a clean expander
             with st.expander(t_convert):
                 aksharamukha_html = f"""
                 <div style="font-family: sans-serif; padding: 10px;">
@@ -125,13 +128,9 @@ if st.button(t_btn, type="primary"):
                 </div>
                 <script src="https://cdn.jsdelivr.net/gh/virtualvinodh/aksharamukha/aksharamukha-web-plugin/aksharamukha-v3.js?source=Devanagari&class=aksharamukha-text"></script>
                 """
-                components.html(
-                    aksharamukha_html, 
-                    height=250, 
-                    scrolling=True
-                )
+                components.html(aksharamukha_html, height=250, scrolling=True)
             
-            # Format DataFrames with Explicit Numbering
+            # Format DataFrames 
             if lang == "संस्कृतम्":
                 prakriya.columns = ["स्थितिः", "सूत्रम्"]
                 summary.columns = ["पदसमूहः", "सूत्राणि", "सन्धियुक्तरूपम्"]
@@ -141,6 +140,8 @@ if st.button(t_btn, type="primary"):
                 
                 prakriya["क्रमः"] = prakriya["क्रमः"].astype(str).apply(eng_to_devanagari)
                 summary["क्रमः"] = summary["क्रमः"].astype(str).apply(eng_to_devanagari)
+                prakriya["सूत्रम्"] = prakriya["सूत्रम्"].apply(eng_to_devanagari)
+                summary["सूत्राणि"] = summary["सूत्राणि"].apply(eng_to_devanagari)
             else:
                 prakriya.columns = ["State", "Sutra"]
                 summary.columns = ["Words", "Sutras", "Sandhi Form"]
