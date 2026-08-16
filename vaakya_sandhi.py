@@ -16,7 +16,12 @@ def vaakya_sandhi(sentence: str, settings: dict = None):
     flag = 0
     temp = ""
 
-    mm = sentence.split(" ")
+    # Clean input: Handle ॐ and remove extra spaces
+    sentence = sentence.replace("ॐ", "ओम्")
+    mm = [w for w in sentence.strip().split() if w]
+    
+    if not mm:
+        return ["", pd.DataFrame(), pd.DataFrame()]
 
     for ii in range(len(mm) - 1):
         primary = mm[ii]
@@ -25,11 +30,15 @@ def vaakya_sandhi(sentence: str, settings: dict = None):
             flag = 0
             primary = temp
 
-        if primary[-1] == "ः":
-            if primary in ["पुनः", "प्रातः", "अन्तः", "स्वः"]:
-                primary = get_shabda(get_vinyaasa(primary[:-1] + "र्"))
-            else:
-                primary = get_shabda(get_vinyaasa(primary[:-1] + "स्"))
+        # Safely attempt vinyaasa, if it fails (e.g. English text), skip sandhi
+        try:
+            if primary[-1] == "ः":
+                if primary in ["पुनः", "प्रातः", "अन्तः", "स्वः"]:
+                    primary = get_shabda(get_vinyaasa(primary[:-1] + "र्"))
+                else:
+                    primary = get_shabda(get_vinyaasa(primary[:-1] + "स्"))
+        except:
+            pass
 
         if primary in avasaana:
             continue
@@ -41,14 +50,29 @@ def vaakya_sandhi(sentence: str, settings: dict = None):
             sv = []
         else:
             s = primary + " " + secondary
-            sv = get_vinyaasa(secondary)
+            try:
+                sv = get_vinyaasa(secondary)
+            except:
+                sv = [] # Failsafe for invalid chars
 
         df = pd.DataFrame(columns=["स्थिति", "सूत्र"])
         row = {"स्थिति": s, "सूत्र": "-"}
         df = pd.concat([df, pd.DataFrame([row])], ignore_index=True)
 
-        ss = get_vinyaasa(s)
-        pv = get_vinyaasa(primary)
+        try:
+            ss = get_vinyaasa(s)
+            pv = get_vinyaasa(primary)
+        except:
+            # Fallback for non-Devanagari
+            dd.extend(list(primary))
+            dd.append(" ")
+            continue
+
+        # Prevent index errors if sv is empty
+        if not sv and secondary not in avasaana:
+            dd.extend(list(primary))
+            dd.append(" ")
+            continue
 
         if pv[-1] in expand_pratyahaara("अच्"):
             if secondary in avasaana:
@@ -156,14 +180,20 @@ def vaakya_sandhi(sentence: str, settings: dict = None):
         last_word = mm[-1]
         if last_word not in avasaana:
             if not any(last_word.endswith(av) for av in avasaana if av != " "):
-                dd.extend(get_vinyaasa(last_word))
+                try:
+                    dd.extend(get_vinyaasa(last_word))
+                except:
+                    dd.extend(list(last_word))
                 dd.append(" ")
             else:
                 for av in avasaana:
                     if av != " " and last_word.endswith(av):
                         word_part = last_word[: -len(av)]
                         if word_part:
-                            dd.extend(get_vinyaasa(word_part))
+                            try:
+                                dd.extend(get_vinyaasa(word_part))
+                            except:
+                                dd.extend(list(word_part))
                             dd.append(" ")
                         dd.append(av)
                         break
@@ -195,6 +225,13 @@ def vaakya_sandhi(sentence: str, settings: dict = None):
         ee = get_shabda(ee)
     else:
         ee = ""
+
+    # Clean up any trailing space issues
+    ee = " ".join(ee.split())
+    # Re-attach danda spaces correctly
+    ee = ee.replace(" ।", "।").replace("।", " । ")
+    ee = ee.replace(" ॥", "॥").replace("॥", " ॥ ")
+    ee = " ".join(ee.split())
 
     prakriya.to_csv("prakriya.csv", index=False)
     sandhi_summary.to_csv("sandhi_summary.csv", index=False)
