@@ -13,17 +13,17 @@ def safe_vinyaasa(word):
     if "ॐ" in word:
         word = word.replace("ॐ", "ओम्")
     try:
-        # Mask ≍ to prevent Illegal varna crash
-        temp_word = word.replace("≍", "ः")
+        # Use ॡ as sentinel token so normal ः is never affected
+        temp_word = word.replace("≍", "ॡ")
         v = get_vinyaasa(temp_word)
-        return ["≍" if x == "ः" else x for x in v]
+        return ["≍" if x == "ॡ" else x for x in v]
     except:
         return None
 
 def safe_shabda(vinyaasa_list):
     try:
-        temp_list = ["ः" if x == "≍" else x for x in vinyaasa_list]
-        return get_shabda(temp_list).replace("ः", "≍")
+        temp_list = ["ॡ" if x == "≍" else x for x in vinyaasa_list]
+        return get_shabda(temp_list).replace("ॡ", "≍")
     except:
         return "".join(vinyaasa_list)
 
