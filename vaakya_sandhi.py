@@ -225,7 +225,6 @@ def vaakya_sandhi(sentence: str, settings: dict = None, lang: str = "संस�
     ee = ee.replace(" ॥", "॥").replace("॥", " ॥ ")
     ee = " ".join(ee.split())
 
-    # Map Devanagari numerals directly to dataframes before returning if in Sanskrit mode
     if lang == "संस्कृतम्":
         prakriya["सूत्र"] = prakriya["सूत्र"].apply(eng_to_devanagari)
         sandhi_summary["सूत्राणि"] = sandhi_summary["सूत्राणि"].apply(eng_to_devanagari)
