@@ -1,15 +1,14 @@
 import pandas as pd
-
 from akshara.varnakaarya import get_vinyaasa, get_shabda
 
 from pratyaahaara import expand_pratyahaara
 from varna import avasaana
 from sutra import *
-
+import sutra # Imported to set module-level settings
 
 def vaakya_sandhi(sentence: str, settings: dict = None):
-    if settings is None:
-        settings = {}
+    # Pass settings globally to Sutra.py
+    sutra.ACTIVE_SETTINGS = settings or {}
 
     prakriya = pd.DataFrame(columns=["स्थिति", "सूत्र"])
     sandhi_summary = pd.DataFrame(columns=["पद समूह", "सूत्राणि", "संधि-कृत रूप"])
@@ -57,84 +56,76 @@ def vaakya_sandhi(sentence: str, settings: dict = None):
                 pass
             elif sv[0] in expand_pratyahaara("हल्"):
                 if pv[-1] in ["अ", "इ", "उ", "ऋ", "ऌ"] and sv[0] == "छ्":
-                    df = छे_च(df, settings)
+                    df = छे_च(df)
             else:
                 if pv[-1] in expand_pratyahaara("एङ्") and sv[0] == "अ":
-                    df = एङः_पदान्तादति(df, settings)
+                    df = एङः_पदान्तादति(df)
                 elif pv[-1] in ["अ", "आ"] and sv[0] in ["ए", "ओ"] and primary in ["प्र", "अप", "अव", "उप", "परा"]:
-                    df = एङि_पररूपम्(df, settings)
+                    df = एङि_पररूपम्(df)
                 elif (pv[-1] == sv[0] and pv[-1] in expand_pratyahaara("अक्")) or (
                     set((pv[-1], sv[0]))
                     in [
-                        set(("अ", "आ")),
-                        set(("इ", "ई")),
-                        set(("उ", "ऊ")),
-                        set(("ऋ", "ॠ")),
-                        set(("ऋ", "ऌ")),
-                        set(("ॠ", "ऌ")),
+                        set(("अ", "आ")), set(("इ", "ई")), set(("उ", "ऊ")),
+                        set(("ऋ", "ॠ")), set(("ऋ", "ऌ")), set(("ॠ", "ऌ")),
                     ]
                 ):
-                    df = अकः_सवर्णे_दीर्घः(df, settings)
+                    df = अकः_सवर्णे_दीर्घः(df)
                 elif pv[-1] in ["अ", "आ"] and sv[0] in expand_pratyahaara("एच्"):
-                    df = वृद्धिरेचि(df, settings)
+                    df = वृद्धिरेचि(df)
                 elif pv[-1] in ["अ", "आ"] and sv[0] in expand_pratyahaara("अक्"):
-                    df = आद्गुणः(df, settings)
+                    df = आद्गुणः(df)
                 elif pv[-1] in expand_pratyahaara("एच्") and sv[0] in expand_pratyahaara("अच्"):
-                    df = एचोऽयवायावः(df, settings)
+                    df = एचोऽयवायावः(df)
                 elif pv[-1] in expand_pratyahaara("इक्") and sv[0] in expand_pratyahaara("अच्"):
-                    df = इको_यणचि(df, settings)
+                    df = इको_यणचि(df)
         else:
             if (
                 secondary not in avasaana
                 and (mm[ii] in ["सस्", "एषस्", "सः", "एषः"] or primary in ["सस्", "एषस्"])
                 and sv[0] in expand_pratyahaara("हल्")
             ):
-                df = एतत्तदोः_सुलोपोऽकोरनञ्समासे_हलि(df, settings)
+                df = एतत्तदोः_सुलोपोऽकोरनञ्समासे_हलि(df)
             elif pv[-1] == "स्":
-                df = ससजुषो_रुः(df, settings)
+                df = ससजुषो_रुः(df)
                 if secondary in avasaana:
-                    df = खरवसानयोर्विसर्जनीयः(df, settings)
+                    df = खरवसानयोर्विसर्जनीयः(df)
                 else:
                     if sv[0] in expand_pratyahaara("खर्"):
-                        df = खरवसानयोर्विसर्जनीयः(df, settings)
+                        df = खरवसानयोर्विसर्जनीयः(df)
                     else:
                         if pv[-2] == "अ":
                             if sv[0] == "अ":
-                                df = अतो_रोरप्लुतादप्लुते(df, settings)
+                                df = अतो_रोरप्लुतादप्लुते(df)
                             elif sv[0] in expand_pratyahaara("हश्"):
-                                df = हशि_च(df, settings)
+                                df = हशि_च(df)
                             else:
-                                df = भोभगोअघोअपूर्वस्य_योऽशि(df, settings)
+                                df = भोभगोअघोअपूर्वस्य_योऽशि(df)
                         elif pv[-2] == "आ":
-                            df = भोभगोअघोअपूर्वस्य_योऽशि(df, settings)
+                            df = भोभगोअघोअपूर्वस्य_योऽशि(df)
                         elif sv[0] == "र्":
-                            df = रो_रि(df, settings)
+                            df = रो_रि(df)
 
             else:
                 if pv[-1] in expand_pratyahaara("झल्"):
-                    df = झलां_जशोऽन्ते(df, settings)
+                    df = झलां_जशोऽन्ते(df)
                 elif secondary not in avasaana and pv[-1] == "र्" and sv[0] == "र्":
-                    df = रो_रि(df, settings)
-                elif pv[-1] == "र्" and (
-                    secondary in avasaana or sv[0] in expand_pratyahaara("खर्")
-                ):
-                    df = खरवसानयोर्विसर्जनीयः(df, settings)
+                    df = रो_रि(df)
+                elif pv[-1] == "र्" and (secondary in avasaana or sv[0] in expand_pratyahaara("खर्")):
+                    df = खरवसानयोर्विसर्जनीयः(df)
                 elif secondary in avasaana:
                     pass
                 elif pv[-1] == "म्" and secondary not in avasaana:
                     if sv[0] in expand_pratyahaara("हल्"):
-                        df = मोऽनुस्वारः(df, settings)
-
+                        df = मोऽनुस्वारः(df)
                 elif secondary not in avasaana and pv[-1] == "न्" and sv[0] in expand_pratyahaara("छव्"):
-                    df = नश्छव्यप्रशान्(df, settings)
+                    df = नश्छव्यप्रशान्(df)
                 elif secondary not in avasaana and pv[-1] == "न्" and sv[0] == "ल्":
-                    df = तोर्लि(df, settings)
+                    df = तोर्लि(df)
                 elif secondary not in avasaana and pv[-1] == "न्" and sv[0] in ["श्", "च्", "छ्", "ज्", "झ्", "ञ्"]:
-                    df = स्तोः_श्चुना_श्चुः(df, settings)
-
+                    df = स्तोः_श्चुना_श्चुः(df)
                 elif secondary not in avasaana and pv[-1] in expand_pratyahaara("हल्") and sv[0] in expand_pratyahaara("अच्"):
                     if pv[-1] in expand_pratyahaara("ङम्") and pv[-2] in ["अ", "इ", "उ", "ऋ", "ऌ"]:
-                        df = ङमो_ह्रस्वादचि_ङमुण्नित्यम्(df, settings)
+                        df = ङमो_ह्रस्वादचि_ङमुण्नित्यम्(df)
 
         r = get_sthiti(df)
 
@@ -157,9 +148,7 @@ def vaakya_sandhi(sentence: str, settings: dict = None):
         sutra_series = " ".join(sutra_list)
 
         row = {"पद समूह": s, "सूत्राणि": sutra_series, "संधि-कृत रूप": r}
-        sandhi_summary = pd.concat(
-            [sandhi_summary, pd.DataFrame([row])], ignore_index=True
-        )
+        sandhi_summary = pd.concat([sandhi_summary, pd.DataFrame([row])], ignore_index=True)
 
     if flag == 1:
         dd.extend(get_vinyaasa(temp))
@@ -184,11 +173,7 @@ def vaakya_sandhi(sentence: str, settings: dict = None):
         ee = [dd[0]]
 
         for i in range(1, len(dd) - 1):
-            if (
-                dd[i] == " "
-                and dd[i - 1] in expand_pratyahaara("हल्")
-                and dd[i + 1] not in avasaana
-            ):
+            if (dd[i] == " " and dd[i - 1] in expand_pratyahaara("हल्") and dd[i + 1] not in avasaana):
                 pass
             else:
                 ee.append(dd[i])
