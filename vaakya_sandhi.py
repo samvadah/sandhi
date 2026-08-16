@@ -32,7 +32,10 @@ def vaakya_sandhi(sentence: str):
             primary = temp
 
         if primary[-1] == "ः":
-            primary = get_shabda(get_vinyaasa(primary[:-1] + "स्"))
+            if primary in ["पुनः", "प्रातः", "अन्तः", "स्वः"]:
+                primary = get_shabda(get_vinyaasa(primary[:-1] + "र्"))
+            else:
+                primary = get_shabda(get_vinyaasa(primary[:-1] + "स्"))
 
         if primary in avasaana:
             continue
@@ -41,12 +44,15 @@ def vaakya_sandhi(sentence: str):
 
         if secondary in avasaana:
             s = primary
+            sv = []
         else:
             s = primary + " " + secondary
             sv = get_vinyaasa(secondary)
 
         df = pd.DataFrame(columns=["स्थिति", "सूत्र"])
         row = {"स्थिति": s, "सूत्र": "-"}
+        
+        # Fixed Pandas deprecation warning: use pd.concat instead of .append()
         df = pd.concat([df, pd.DataFrame([row])], ignore_index=True)
 
         ss = get_vinyaasa(s)
@@ -56,10 +62,13 @@ def vaakya_sandhi(sentence: str):
             if secondary in avasaana:
                 pass
             elif sv[0] in expand_pratyahaara("हल्"):
-                pass
+                if pv[-1] in ["अ", "इ", "उ", "ऋ", "ऌ"] and sv[0] == "छ्":
+                    df = छे_च(df)
             else:
                 if pv[-1] in expand_pratyahaara("एङ्") and sv[0] == "अ":
                     df = एङः_पदान्तादति(df)
+                elif pv[-1] in ["अ", "आ"] and sv[0] in ["ए", "ओ"] and primary in ["प्र", "अप", "अव", "उप", "परा"]:
+                    df = एङि_पररूपम्(df)
                 elif (pv[-1] == sv[0] and pv[-1] in expand_pratyahaara("अक्")) or (
                     set((pv[-1], sv[0]))
                     in [
@@ -86,9 +95,9 @@ def vaakya_sandhi(sentence: str):
                     df = इको_यणचि(df)
         else:
             if (
-                (mm[ii] == "सस्" or mm[ii] == "एषस्")
+                secondary not in avasaana
+                and (mm[ii] in ["सस्", "एषस्", "सः", "एषः"] or primary in ["सस्", "एषस्"])
                 and sv[0] in expand_pratyahaara("हल्")
-                and secondary not in avasaana
             ):
                 df = एतत्तदोः_सुलोपोऽकोरनञ्समासे_हलि(df)
             elif pv[-1] == "स्":
@@ -99,7 +108,9 @@ def vaakya_sandhi(sentence: str):
                     if sv[0] in expand_pratyahaara("खर्"):
                         df = खरवसानयोर्विसर्जनीयः(df)
                     else:
-                        if pv[-2] == "अ":
+                        if sv[0] == "र्":
+                            df = रो_रि(df)
+                        elif pv[-2] == "अ":
                             if sv[0] == "अ":
                                 df = अतो_रोरप्लुतादप्लुते(df)
                             elif sv[0] in expand_pratyahaara("हश्"):
@@ -112,6 +123,8 @@ def vaakya_sandhi(sentence: str):
             else:
                 if pv[-1] in expand_pratyahaara("झल्"):
                     df = झलां_जशोऽन्ते(df)
+                elif secondary not in avasaana and pv[-1] == "र्" and sv[0] == "र्":
+                    df = रो_रि(df)
                 elif pv[-1] == "र्" and (
                     secondary in avasaana or sv[0] in expand_pratyahaara("खर्")
                 ):
@@ -122,14 +135,14 @@ def vaakya_sandhi(sentence: str):
                     if sv[0] in expand_pratyahaara("हल्"):
                         df = मोऽनुस्वारः(df)
 
-                elif pv[-1] == "न्" and sv[0] in expand_pratyahaara("छव्"):
+                elif secondary not in avasaana and pv[-1] == "न्" and sv[0] in expand_pratyahaara("छव्"):
                     df = नश्छव्यप्रशान्(df)
-                elif pv[-1] == "न्" and sv[0] == "ल्":
+                elif secondary not in avasaana and pv[-1] == "न्" and sv[0] == "ल्":
                     df = तोर्लि(df)
-                elif pv[-1] == "न्" and sv[0] in ["श्", "च्", "छ्", "ज्", "झ्", "ञ्"]:
+                elif secondary not in avasaana and pv[-1] == "न्" and sv[0] in ["श्", "च्", "छ्", "ज्", "झ्", "ञ्"]:
                     df = स्तोः_श्चुना_श्चुः(df)
 
-                elif pv[-1] in expand_pratyahaara("हल्") and sv[0] in expand_pratyahaara(
+                elif secondary not in avasaana and pv[-1] in expand_pratyahaara("हल्") and sv[0] in expand_pratyahaara(
                     "अच्"
                 ):
 
@@ -159,14 +172,14 @@ def vaakya_sandhi(sentence: str):
                 flag = 1
                 temp = r
 
-        # prakriya = prakriya.append(df, ignore_index=True)
-        prakriya = pd.concat([prakriya, df], ignore_index=True)
+        # Fixed Pandas deprecation warning: use pd.concat instead of .append()
+        if not df.empty:
+            prakriya = pd.concat([prakriya, df], ignore_index=True)
 
         sutra_list = list(df["सूत्र"])
         sutra_series = " ".join(sutra_list)
 
         row = {"पद समूह": s, "सूत्राणि": sutra_series, "संधि-कृत रूप": r}
-        # sandhi_summary = sandhi_summary.append(row, ignore_index=True)
         sandhi_summary = pd.concat(
             [sandhi_summary, pd.DataFrame([row])], ignore_index=True
         )
@@ -196,37 +209,41 @@ def vaakya_sandhi(sentence: str):
                         dd.append(av)
                         break
 
-    ee = [dd[0]]
+    if len(dd) > 0:
+        ee = [dd[0]]
 
-    for i in range(1, len(dd) - 1):
+        for i in range(1, len(dd) - 1):
 
-        if (
-            dd[i] == " "
-            and dd[i - 1] in expand_pratyahaara("हल्")
-            and dd[i + 1] not in avasaana
-        ):
-            pass
-        else:
-            ee.append(dd[i])
+            if (
+                dd[i] == " "
+                and dd[i - 1] in expand_pratyahaara("हल्")
+                and dd[i + 1] not in avasaana
+            ):
+                pass
+            else:
+                ee.append(dd[i])
 
-    ee.append(dd[-1])
+        if len(dd) > 1:
+            ee.append(dd[-1])
 
-    # Ensure punctuation marks । and ॥ are surrounded by spaces on both sides
-    punctuation_marks = ["।", "॥"]
-    i = 0
-    while i < len(ee):
-        if ee[i] in punctuation_marks:
-            # Check if there's no space before the punctuation
-            if i > 0 and ee[i - 1] != " ":
-                ee.insert(i, " ")
-                i += 1  # Adjust index after insertion
-            # Check if there's no space after the punctuation
-            if i < len(ee) - 1 and ee[i + 1] != " ":
-                ee.insert(i + 1, " ")
-                i += 1  # Adjust index after insertion
-        i += 1
+        # Ensure punctuation marks । and ॥ are surrounded by spaces on both sides
+        punctuation_marks = ["।", "॥"]
+        i = 0
+        while i < len(ee):
+            if ee[i] in punctuation_marks:
+                # Check if there's no space before the punctuation
+                if i > 0 and ee[i - 1] != " ":
+                    ee.insert(i, " ")
+                    i += 1  # Adjust index after insertion
+                # Check if there's no space after the punctuation
+                if i < len(ee) - 1 and ee[i + 1] != " ":
+                    ee.insert(i + 1, " ")
+                    i += 1  # Adjust index after insertion
+            i += 1
 
-    ee = get_shabda(ee)
+        ee = get_shabda(ee)
+    else:
+        ee = ""
 
     prakriya.to_csv("prakriya.csv", index=False)
     sandhi_summary.to_csv("sandhi_summary.csv", index=False)
