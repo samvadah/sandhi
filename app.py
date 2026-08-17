@@ -3,7 +3,7 @@ import pandas as pd
 import streamlit.components.v1 as components
 from core import vaakya_sandhi
 
-st.set_page_config( page_title="सन्धीराट्", layout="centered")
+st.set_page_config(page_title="सन्धीराट्", layout="centered")
 
 # Language Toggle in Sidebar
 lang = st.sidebar.radio("भाषा / Language", ["संस्कृतम्", "English"])
@@ -21,10 +21,11 @@ if lang == "संस्कृतम्":
     t_settings = "सन्धिविकल्पाः"
     t_warn = "कृपया शुद्धं संस्कृतवाक्यं प्रदीयताम् ।"
     t_lopa = "लोपः शाकल्यस्य (द्वावपि -> द्वा अपि)"
-    t_vaa = "वा शरि (तपस्स्वाध्याय -> तपःस्वाध्याय)"
+    t_vaa = "वा शरि (तपस्स्वाध्याय -> तपः स्वाध्याय)"
     t_yaro = "यरोऽनुनासिके (एतद् मुरारिः -> एतन्मुरारिः)"
     t_shashcho = "शशछोऽटि (तद् शिवः -> तच्छिवः)"
     t_jhayo = "झयो होऽन्यतरस्याम् (वाग् हरिः -> वाग्घरिः)"
+    t_anusvara = "वा पदान्तस्य (सम् कल्पः -> सङ्कल्पः)"
     t_disclaimer_title = "सूचनम्"
     t_disclaimer_body = (
         "<strong>पदान्तसन्धिरेवायम्।</strong> अयं तन्त्रांशः पृथक्पदानां सन्धये एव निर्मितः न तु पदान्तर्गतसन्धये यथा ने अनम् नयनम् ।<br><br>"
@@ -49,10 +50,11 @@ else:
     t_settings = "Sandhi Settings"
     t_warn = "Please enter a valid Sanskrit sentence."
     t_lopa = "Apply लोपः शाकल्यस्य (e.g., द्वावपि -> द्वा अपि)"
-    t_vaa = "Apply वा शरि (e.g., तपस्स्वाध्याय -> तपःस्वाध्याय)"
+    t_vaa = "Apply वा शरि (e.g., तपस्स्वाध्याय -> तपः स्वाध्याय)"
     t_yaro = "Apply यरोऽनुनासिके (e.g., एतद् मुरारिः -> एतन्मुरारिः)"
     t_shashcho = "Apply शशछोऽटि (e.g., तद् शिवः -> तच्छिवः)"
     t_jhayo = "Apply झयो होऽन्यतरस्याम् (e.g., वाग् हरिः -> वाग्घरिः)"
+    t_anusvara = "Apply वा पदान्तस्य (e.g., सम् कल्पः -> सङ्कल्पः)"
     t_disclaimer_title = "Disclaimer & Notes"
     t_disclaimer_body = (
         "<strong>External Sandhi Only:</strong> This tool is meant for external sandhi (पदान्त) between separate words. It is not designed for internal sandhi (अपदान्त) like <em>ने + अनं = नयनं</em>.<br><br>"
@@ -76,13 +78,15 @@ vaa_shari = st.sidebar.checkbox(t_vaa, value=True)
 yaro_anunasike = st.sidebar.checkbox(t_yaro, value=True)
 shashcho_ati = st.sidebar.checkbox(t_shashcho, value=True)
 jhayo_ho = st.sidebar.checkbox(t_jhayo, value=True)
+anusvarasya_yayi = st.sidebar.checkbox(t_anusvara, value=False)
 
 settings = {
     "lopa_shakalyasya": lopa_shakalyasya,
     "vaa_shari": vaa_shari,
     "yaro_anunasike": yaro_anunasike,
     "shashcho_ati": shashcho_ati,
-    "jhayo_ho": jhayo_ho
+    "jhayo_ho": jhayo_ho,
+    "anusvarasya_yayi": anusvarasya_yayi
 }
 
 st.markdown(t_img_prompt, unsafe_allow_html=True)
