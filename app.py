@@ -1,7 +1,7 @@
 import streamlit as st
 import pandas as pd
 import streamlit.components.v1 as components
-from core import vaakya_sandhi
+from vaakya_sandhi import vaakya_sandhi
 
 st.set_page_config( page_title="सन्धीराट्", layout="centered")
 
