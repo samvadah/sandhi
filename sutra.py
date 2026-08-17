@@ -199,6 +199,8 @@ def एङि_पररूपम्(df):
         temp = s[ii + 1]
         del s[ii + 1]
         s = aadesh(s, ii - 1, temp)
+        if " " in s:
+            s.remove(" ")
     df = post_processing(df, s, "एङि पररूपम्", "6.1.94")
     return df
 
@@ -207,6 +209,7 @@ def छे_च(df):
     if " " in s:
         ii = s.index(" ")
         s.insert(ii, "च्")
+        s.remove(" ")
     df = post_processing(df, s, "छे च", "6.1.73")
     return df
 
@@ -362,6 +365,8 @@ def लोपः_शाकल्यस्य(df):
         if s[ii - 1] in ["य्", "व्"] and s[ii + 1] in expand_pratyahaara("अच्"):
             if ACTIVE_SETTINGS.get("lopa_shakalyasya", True):
                 del s[ii - 1]
+            else:
+                s.remove(" ")
 
     df = post_processing(df, s, "लोपः शाकल्यस्य", "8.3.19")
     return df
@@ -373,6 +378,8 @@ def ओतो_गार्ग्यस्य(df):
         if s[ii - 1] in ["य्", "व्"] and s[ii + 1] in expand_pratyahaara("अश्"):
             if ACTIVE_SETTINGS.get("lopa_shakalyasya", True):
                 del s[ii - 1]
+            else:
+                s.remove(" ")
 
     df = post_processing(df, s, "ओतो गार्ग्यस्य", "8.3.20")
     return df
