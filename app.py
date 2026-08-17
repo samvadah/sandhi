@@ -23,7 +23,6 @@ if lang == "संस्कृतम्":
     t_prakriya = "प्रक्रिया"
     t_settings = "सन्धिविकल्पाः"
     t_warn = "कृपया शुद्धं संस्कृतवाक्यं प्रदीयताम् ।"
-    t_remove_spaces = "सन्धियुक्तपदानां मध्ये रिक्तस्थानं मास्तु (रामो राजा -> रामोराजा)"
     t_lopa = "लोपः शाकल्यस्य (द्वावपि -> द्वा अपि)"
     t_vaa = "वा शरि (तपस्स्वाध्याय -> तपः स्वाध्याय)"
     t_jihva = "कुप्वोः ≍क≍पौ च (बालः क्रीडति -> बाल≍क्रीडति)"
@@ -55,7 +54,6 @@ else:
     t_prakriya = "Prakriya (Derivation)"
     t_settings = "Sandhi Settings"
     t_warn = "Please enter a valid Sanskrit sentence."
-    t_remove_spaces = "Remove spaces between sandhified words (e.g., रामो राजा -> रामोराजा)"
     t_lopa = "Apply लोपः शाकल्यस्य (e.g., द्वावपि -> द्वा अपि)"
     t_vaa = "Apply वा शरि (e.g., तपस्स्वाध्याय -> तपः स्वाध्याय)"
     t_jihva = "Apply कुप्वोः ≍क≍पौ च (e.g., बालः क्रीडति -> बाल≍क्रीडति)"
@@ -81,7 +79,6 @@ st.markdown(t_subtitle)
 # Sidebar Settings
 st.sidebar.header(t_settings)
 
-remove_spaces = st.sidebar.checkbox(t_remove_spaces, value=False)
 lopa_shakalyasya = st.sidebar.checkbox(t_lopa, value=True)
 vaa_shari = st.sidebar.checkbox(t_vaa, value=True)
 jihva_upadh = st.sidebar.checkbox(t_jihva, value=False)
@@ -90,7 +87,6 @@ shashcho_ati = st.sidebar.checkbox(t_shashcho, value=True)
 jhayo_ho = st.sidebar.checkbox(t_jhayo, value=True)
 
 settings = {
-    "remove_spaces": remove_spaces,
     "lopa_shakalyasya": lopa_shakalyasya,
     "vaa_shari": vaa_shari,
     "jihva_upadh": jihva_upadh,
@@ -103,7 +99,7 @@ st.markdown(t_img_prompt, unsafe_allow_html=True)
 
 default_text = "अत्र अपि मुनिः उवाच भोः अच्युत तव औदार्यम् अति उत्तमम् गौः गच्छति यदि अपि सु आगतम् पितृ आज्ञा कर्तृ इह अद्य एव महा ऋषिः अस्ति। वाक् मयम् षट् मुखः तत् जलम् दिक् अन्तः जगत् ईशः पश्यति बालकः हसति नरः अत्र गै अकः पौ अकः च ने अनम् करोति। तत् लयः तत् शिवः रामः टीकते उद् डयनम् तत् चकार वृक्ष छाया किम् करोति देवाः इह अतः एव सः गच्छति एषः विष्णुः। प्र एजते उप ओषति अमी अश्वाः भानुः भाति पुनः रमते हरिः रयः कः चित् धनुः टङ्कारः निः सारः दुः खम् प्राक् नास्ति। मनस् रथः नमः ते पुनः च रामः षष्ठः बालः तरति सम् कल्पः सम् भवः चित् मयम् वाक् हरिः सुप् अन्तम्। मातुः कृपा पितुः इच्छा भ्रातुः धनम् सर्वम् अत्र अस्ति विद्वान् लिखति तान् जयेत् हसन् चकितः सम्राट् गच्छति अप् जम्। गौः अश्वः च पशोः अन्नम् नृपः जयति मुनिः ईक्षते साधुः उवाच मातृ ऋणम् च गो अग्रम् नौ इह वधु आगमनम् भवति।"
 
-input_text = st.text_area(t_input_label, value=default_text, height=150, label_visibility="collapsed")
+input_text = st.text_area(t_input_label, value=default_text, height=150, label_visibility="visible")
 
 def eng_to_devanagari(text):
     mapping = str.maketrans('0123456789', '०१२३४५६७८९')
@@ -129,7 +125,12 @@ if st.button(t_btn, type="primary"):
                 </div>
                 <script src="https://cdn.jsdelivr.net/gh/virtualvinodh/aksharamukha/aksharamukha-web-plugin/aksharamukha-v3.js?source=Devanagari&class=aksharamukha-text"></script>
                 """
-                components.html(aksharamukha_html, height=250, scrolling=True)
+                # Using allow-scripts and allow-same-origin so the API can populate the dropdown list
+                components.html(
+                    aksharamukha_html, 
+                    height=250, 
+                    scrolling=True
+                )
             
             # Format DataFrames with Explicit Numbering
             if lang == "संस्कृतम्":
@@ -141,8 +142,6 @@ if st.button(t_btn, type="primary"):
                 
                 prakriya["क्रमः"] = prakriya["क्रमः"].astype(str).apply(eng_to_devanagari)
                 summary["क्रमः"] = summary["क्रमः"].astype(str).apply(eng_to_devanagari)
-                prakriya["सूत्रम्"] = prakriya["सूत्रम्"].apply(eng_to_devanagari)
-                summary["सूत्राणि"] = summary["सूत्राणि"].apply(eng_to_devanagari)
             else:
                 prakriya.columns = ["State", "Sutra"]
                 summary.columns = ["Words", "Sutras", "Sandhi Form"]
