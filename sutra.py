@@ -1,35 +1,9 @@
 import pandas as pd
-from akshara.varnakaarya import get_vinyaasa as _orig_get_vinyaasa, get_shabda as _orig_get_shabda
+from akshara.varnakaarya import get_vinyaasa, get_shabda
 from pratyaahaara import expand_pratyahaara
 from varna import *
 
 ACTIVE_SETTINGS = {}
-
-def get_vinyaasa(word):
-    if not word: return []
-    word = str(word).replace("ॐ", "ओम्")
-    temp = word.replace("≍", "ॡ")
-    try:
-        v = _orig_get_vinyaasa(temp)
-        return ["≍" if x == "ॡ" else x for x in v]
-    except:
-        return list(word)
-
-def get_shabda(v_list):
-    if not v_list: return ""
-    temp = ["ॡ" if x == "≍" else x for x in v_list]
-    try:
-        res = _orig_get_shabda(temp)
-        return res.replace("ॡ", "≍")
-    except:
-        return "".join(v_list).replace("ॡ", "≍")
-
-def get_boundary(s):
-    # Consistently grabs the LAST space in the array for multi-word Sandhis
-    for i in range(len(s) - 1, -1, -1):
-        if s[i] == " ":
-            return i
-    return -1
 
 def get_sthiti(df):
     return list(df["स्थिति"])[-1]
@@ -163,18 +137,17 @@ def अकः_सवर्णे_दीर्घः(df):
 
 def एङः_पदान्तादति(df):
     s = pre_processing(df)
-    ii = get_boundary(s)
-    if ii != -1:
-        if s[ii - 1] in expand_pratyahaara("एङ्") and s[ii + 1] == "अ":
-            del s[ii]
-            aadesh(s, ii, "ऽ")
+    ii = s.index(" ")
+    if s[ii - 1] in expand_pratyahaara("एङ्") and s[ii + 1] == "अ":
+        del s[ii]
+        aadesh(s, ii, "ऽ")
     df = post_processing(df, s, "एङः पदान्तादति", "6.1.109")
     return df
 
 def अतो_रोरप्लुतादप्लुते(df):
     s = pre_processing(df)
-    ii = get_boundary(s)
-    if ii != -1:
+    if " " in s:
+        ii = s.index(" ")
         if s[ii - 2] == "अ" and s[ii + 1] == "अ" and s[ii - 1] == "र्":
             aadesh(s, ii - 1, " उ")
     df = post_processing(df, s, "अतो रोरप्लुतादप्लुते", "6.1.113")
@@ -184,8 +157,8 @@ def अतो_रोरप्लुतादप्लुते(df):
 
 def हशि_च(df):
     s = pre_processing(df)
-    ii = get_boundary(s)
-    if ii != -1:
+    if " " in s:
+        ii = s.index(" ")
         if (s[ii - 2] == "अ" and s[ii + 1] in expand_pratyahaara("हश्") and s[ii - 1] == "र्"):
             aadesh(s, ii - 1, " उ")
     df = post_processing(df, s, "हशि च", "6.1.114")
@@ -194,41 +167,43 @@ def हशि_च(df):
 
 def एतत्तदोः_सुलोपोऽकोरनञ्समासे_हलि(df):
     s = pre_processing(df)
-    ii = get_boundary(s)
-    if ii != -1:
-        if s[ii - 1] == "स्" and s[ii + 1] in expand_pratyahaara("हल्"):
-            del s[ii - 1]
+    ii = s.index(" ")
+    if s[ii - 1] == "स्" and s[ii + 1] in expand_pratyahaara("हल्"):
+        del s[ii - 1]
     df = post_processing(df, s, "एतत्तदोः सुलोपोऽकोरनञ्समासे हलि", "6.1.132")
     return df
 
 def एङि_पररूपम्(df):
     s = pre_processing(df)
-    ii = get_boundary(s)
-    if ii != -1:
+    if " " in s:
+        ii = s.index(" ")
         temp = s[ii + 1]
         del s[ii + 1]
         s = aadesh(s, ii - 1, temp)
-    df = post_processing(df, s, "एङि पररूपम्", "6.1.94")
+        if " " in s:
+            s.remove(" ")
+        df = post_processing(df, s, "एङि पररूपम्", "6.1.94")
     return df
 
 def छे_च(df):
     s = pre_processing(df)
-    ii = get_boundary(s)
-    if ii != -1:
+    if " " in s:
+        ii = s.index(" ")
         s.insert(ii, "च्")
-    df = post_processing(df, s, "छे च", "6.1.73")
+        s.remove(" ")
+        df = post_processing(df, s, "छे च", "6.1.73")
     return df
 
 def रो_रि(df):
     s = pre_processing(df)
-    ii = get_boundary(s)
-    if ii != -1:
+    if " " in s:
+        ii = s.index(" ")
         if s[ii - 1] == "र्" and s[ii + 1] == "र्":
             del s[ii - 1]
             df = post_processing(df, s, "रो रि", "8.3.14")
             
             s = pre_processing(df)
-            ii = get_boundary(s)
+            ii = s.index(" ")
             prev_vowel = s[ii - 1]
             if prev_vowel in ["अ", "इ", "उ"]:
                 if prev_vowel == "अ": aa = "आ"
@@ -240,10 +215,9 @@ def रो_रि(df):
 
 def झलां_जशोऽन्ते(df):
     s = pre_processing(df)
-    ii = get_boundary(s)
-    if ii != -1:
+    if " " in s:
+        ii = s.index(" ")
         if s[ii - 1] in expand_pratyahaara("झल्"):
-            aa = s[ii - 1]
             word_str = get_shabda(s[:ii])
             if word_str.endswith("राज्") or word_str.endswith("भ्राज्"): aa = "ड्" 
             elif s[ii - 1] in ["च्", "छ्", "ज्", "झ्"]: aa = "ग्"
@@ -252,11 +226,11 @@ def झलां_जशोऽन्ते(df):
             elif s[ii - 1] in ["त्", "थ्", "द्", "ध्", "स्"]: aa = "द्"
             elif s[ii - 1] in ["प्", "फ्", "ब्", "भ्"]: aa = "ब्"
             elif s[ii - 1] == "श्": aa = "ड्"
+            else: aa = s[ii - 1] 
             s = aadesh(s, ii - 1, aa)
 
     elif len(s) > 0 and s[-1] in expand_pratyahaara("झल्"):
         ii = len(s)
-        aa = s[ii - 1]
         word_str = get_shabda(s[:ii])
         if word_str.endswith("राज्") or word_str.endswith("भ्राज्"): aa = "ड्"
         elif s[ii - 1] in ["च्", "छ्", "ज्", "झ्"]: aa = "ग्"
@@ -265,12 +239,13 @@ def झलां_जशोऽन्ते(df):
         elif s[ii - 1] in ["त्", "थ्", "द्", "ध्", "स्"]: aa = "द्"
         elif s[ii - 1] in ["प्", "फ्", "ब्", "भ्"]: aa = "ब्"
         elif s[ii - 1] == "श्": aa = "ड्"
+        else: aa = s[ii - 1]
         s = aadesh(s, ii - 1, aa)
 
     df = post_processing(df, s, "झलां जशोऽन्ते", "8.2.39")
 
     if " " in s:
-        ii = get_boundary(s)
+        ii = s.index(" ")
         l1 = ["स्", "त्", "थ्", "द्", "ध्", "न्"]
         l2 = ["श्", "च्", "छ्", "ज्", "झ्", "ञ्"]
         l3 = ["ष्", "ट्", "ठ्", "ड्", "ढ्", "ण्"]
@@ -281,8 +256,8 @@ def झलां_जशोऽन्ते(df):
             df = ष्टुना_ष्टुः(df)
 
         s = pre_processing(df)
-        ii = get_boundary(s)
-        if ii != -1:
+        if " " in s:
+            ii = s.index(" ")
             if s[ii - 1] in expand_pratyahaara("यर्") and s[ii + 1] in expand_pratyahaara("ञम्"):
                 df = यरोऽनुनासिकेऽनुनासिको_वा(df)
             if s[ii + 1] in expand_pratyahaara("खर्"):
@@ -298,26 +273,19 @@ def झलां_जशोऽन्ते(df):
 
 def ससजुषो_रुः(df):
     s = pre_processing(df)
-    ii = get_boundary(s)
-    target_idx = -1
-    if ii != -1 and s[ii - 1] == "स्": 
-        target_idx = ii - 1
-    elif len(s) > 0 and s[-1] == "स्": 
-        target_idx = len(s) - 1
-        
-    if target_idx != -1:
-        s = aadesh(s, target_idx, "रुँ")
-        df = post_processing(df, s, "ससजुषो रुः", "8.2.66")
-        df = तस्य_लोपः(df, target_idx + 1)
+    if " " in s and s[s.index(" ") - 1] == "स्": ii = s.index(" ") - 1
+    elif s[-1] == "स्": ii = len(s) - 1
+    s = aadesh(s, ii, "रुँ")
+    df = post_processing(df, s, "ससजुषो रुः", "8.2.66")
+    df = तस्य_लोपः(df, ii + 1)
     return df
 
 def नश्छव्यप्रशान्(df):
     s = pre_processing(df)
-    ii = get_boundary(s)
-    if ii != -1:
-        if s[ii - 1] == "न्" and s[ii + 1] in expand_pratyahaara("छव्"):
-            s = aadesh(s, ii - 1, "रुँ")
-            s.insert(ii - 1, "ं")
+    ii = s.index(" ")
+    if s[ii - 1] == "न्" and s[ii + 1] in expand_pratyahaara("छव्"):
+        s = aadesh(s, ii - 1, "रुँ")
+        s[ii - 1 : ii - 1] = "ं"
     df = post_processing(df, s, "नश्छव्यप्रशान्", "8.3.7")
     df = तस्य_लोपः(df, ii + 1)
     df = खरवसानयोर्विसर्जनीयः(df)
@@ -325,18 +293,17 @@ def नश्छव्यप्रशान्(df):
 
 def खरवसानयोर्विसर्जनीयः(df):
     s = pre_processing(df)
-    ii = get_boundary(s)
-    if ii != -1:
+    if " " in s:
+        ii = s.index(" ")
         if s[ii - 1] == "र्" and s[ii + 1] in expand_pratyahaara("खर्"):
             aadesh(s, ii - 1, "ः")
-    elif len(s) > 0 and s[-1] == "र्":
+    elif s[-1] == "र्":
         aadesh(s, len(s) - 1, "ः")
 
     df = post_processing(df, s, "खरवसानयोर्विसर्जनीयः", "8.3.15")
 
-    s = pre_processing(df)
-    ii = get_boundary(s)
-    if ii != -1:
+    if " " in s:
+        ii = s.index(" ")
         if s[ii + 2] in expand_pratyahaara("शर्"):
             df = शर्परे_विसर्जनीयः(df)
         elif s[ii + 1] in expand_pratyahaara("शर्"):
@@ -345,8 +312,7 @@ def खरवसानयोर्विसर्जनीयः(df):
             else:
                 df = विसर्जनीयस्य_सः(df)
         elif s[ii + 1] in ["क्", "ख्", "प्", "फ्"]:
-            if ACTIVE_SETTINGS.get("jihva_upadh", False):
-                df = कुप्वोः_कपौ_च(df)
+            df = कुप्वोः_कपौ_च(df)
         else:
             df = विसर्जनीयस्य_सः(df)
 
@@ -354,16 +320,15 @@ def खरवसानयोर्विसर्जनीयः(df):
 
 def भोभगोअघोअपूर्वस्य_योऽशि(df):
     s = pre_processing(df)
-    ii = get_boundary(s)
-    if ii != -1:
+    if " " in s:
+        ii = s.index(" ")
         if (s[ii - 1] == "र्" and s[ii + 1] in expand_pratyahaara("अश्") and (s[ii - 2] in ["अ", "आ"] or get_shabda(s[ii - 3 : ii]) == "भोर्" or get_shabda(s[ii - 5 : ii]) in ["भगोर्", "अघोर्"])):
             s = aadesh(s, ii - 1, "य्")
 
     df = post_processing(df, s, "भोभगोअघोअपूर्वस्य योऽशि", "8.3.17")
 
-    s = pre_processing(df)
-    ii = get_boundary(s)
-    if ii != -1:
+    if " " in s:
+        ii = s.index(" ")
         if s[ii + 1] in expand_pratyahaara("हल्"):
             df = हलि_सर्वेषाम्(df)
         elif s[ii - 2] == "ओ":
@@ -375,30 +340,34 @@ def भोभगोअघोअपूर्वस्य_योऽशि(df):
 
 def लोपः_शाकल्यस्य(df):
     s = pre_processing(df)
-    ii = get_boundary(s)
-    if ii != -1:
+    if " " in s:
+        ii = s.index(" ")
         if s[ii - 1] in ["य्", "व्"] and s[ii + 1] in expand_pratyahaara("अच्"):
             if ACTIVE_SETTINGS.get("lopa_shakalyasya", True):
                 del s[ii - 1]
+            else:
+                s.remove(" ")
 
     df = post_processing(df, s, "लोपः शाकल्यस्य", "8.3.19")
     return df
 
 def ओतो_गार्ग्यस्य(df):
     s = pre_processing(df)
-    ii = get_boundary(s)
-    if ii != -1:
+    if " " in s:
+        ii = s.index(" ")
         if s[ii - 1] in ["य्", "व्"] and s[ii + 1] in expand_pratyahaara("अश्"):
             if ACTIVE_SETTINGS.get("lopa_shakalyasya", True):
                 del s[ii - 1]
+            else:
+                s.remove(" ")
 
     df = post_processing(df, s, "ओतो गार्ग्यस्य", "8.3.20")
     return df
 
 def हलि_सर्वेषाम्(df):
     s = pre_processing(df)
-    ii = get_boundary(s)
-    if ii != -1:
+    if " " in s:
+        ii = s.index(" ")
         if s[ii - 1] in ["य्", "व्"] and s[ii + 1] in expand_pratyahaara("हल्"):
             del s[ii - 1]
     df = post_processing(df, s, "हलि सर्वेषाम्", "8.3.22")
@@ -406,34 +375,31 @@ def हलि_सर्वेषाम्(df):
 
 def मोऽनुस्वारः(df):
     s = pre_processing(df)
-    ii = get_boundary(s)
-    if ii != -1:
-        if s[ii - 1] == "म्" and s[ii + 1] in expand_pratyahaara("हल्"):
-            s = aadesh(s, ii - 1, "ं")
+    ii = s.index(" ")
+    if s[ii - 1] == "म्" and s[ii + 1] in expand_pratyahaara("हल्"):
+        s = aadesh(s, ii - 1, "ं")
     df = post_processing(df, s, "मोऽनुस्वारः", "8.3.23")
     return df
 
 def ङमो_ह्रस्वादचि_ङमुण्नित्यम्(df):
     s = pre_processing(df)
-    ii = get_boundary(s)
-    if ii != -1:
-        if (s[ii - 2] in ["अ", "इ", "उ", "ऋ", "ऌ"] and s[ii - 1] in expand_pratyahaara("ङम्") and s[ii + 1] in expand_pratyahaara("अच्")):
-            s.insert(ii - 1, s[ii - 1])
+    ii = s.index(" ")
+    if (s[ii - 2] in ["अ", "इ", "उ", "ऋ", "ऌ"] and s[ii - 1] in expand_pratyahaara("ङम्") and s[ii + 1] in expand_pratyahaara("अच्")):
+        s.insert(ii - 1, s[ii - 1])
     df = post_processing(df, s, "ङमो ह्रस्वादचि ङमुण्नित्यम्", "8.3.32")
     return df
 
 def विसर्जनीयस्य_सः(df):
     s = pre_processing(df)
-    ii = get_boundary(s)
-    if ii != -1:
+    if " " in s:
+        ii = s.index(" ")
         if s[ii - 1] == "ः" and (s[ii + 1] in expand_pratyahaara("छव्") or s[ii + 1] in expand_pratyahaara("शर्")):
             s = aadesh(s, ii - 1, "स्")
 
     df = post_processing(df, s, "विसर्जनीयस्य सः", "8.3.34")
 
-    s = pre_processing(df)
-    ii = get_boundary(s)
-    if ii != -1:
+    if " " in s:
+        ii = s.index(" ")
         if s[ii - 1] == "स्":
             if s[ii + 1] in ["च्", "छ्", "श्"]:
                 df = स्तोः_श्चुना_श्चुः(df)
@@ -448,104 +414,109 @@ def शर्परे_विसर्जनीयः(df):
 
 def वा_शरि(df):
     s = pre_processing(df)
+    if " " in s:
+        if ACTIVE_SETTINGS.get("vaa_shari", True):
+            s.remove(" ")
     df = post_processing(df, s, "वा शरि", "8.3.36")
     return df
 
 def कुप्वोः_कपौ_च(df):
     s = pre_processing(df)
-    ii = get_boundary(s)
-    if ii != -1:
+    if " " in s:
+        ii = s.index(" ")
         if s[ii - 1] == "ः" and s[ii + 1] in ["क्", "ख्", "प्", "फ्"]:
-            s = aadesh(s, ii - 1, "≍")
+            if ACTIVE_SETTINGS.get("jihva_upadh", False):
+                s = aadesh(s, ii - 1, "≍")
     df = post_processing(df, s, "कुप्वोः ≍क≍पौ च", "8.3.37")
     return df
 
 def स्तोः_श्चुना_श्चुः(df):
     s = pre_processing(df)
+    ii = s.index(" ")
     l1 = ["स्", "त्", "थ्", "द्", "ध्", "न्"]
     l2 = ["श्", "च्", "छ्", "ज्", "झ्", "ञ्"]
     dd = dict(zip(l1, l2))
 
-    ii = get_boundary(s)
-    if ii != -1:
-        if s[ii - 1] in l1 and s[ii + 1] in l2:
-            s = aadesh(s, ii - 1, dd[s[ii - 1]])
-        elif s[ii - 1] in l2 and s[ii + 1] in l1:
-            s = aadesh(s, ii + 1, dd[s[ii + 1]])
+    if s[ii - 1] in l1 and s[ii + 1] in l2:
+        aa = dd[s[ii - 1]]
+        jj = ii - 1
+    if s[ii - 1] in l2 and s[ii + 1] in l1:
+        aa = dd[s[ii + 1]]
+        jj = ii + 1
 
+    s = aadesh(s, jj, aa)
     df = post_processing(df, s, "स्तोः श्चुना श्चुः", "8.4.40")
     return df
 
 def ष्टुना_ष्टुः(df):
     s = pre_processing(df)
+    ii = s.index(" ")
     l1 = ["स्", "त्", "थ्", "द्", "ध्", "न्"]
     l2 = ["ष्", "ट्", "ठ्", "ड्", "ढ्", "ण्"]
     dd = dict(zip(l1, l2))
 
-    ii = get_boundary(s)
-    if ii != -1:
-        if s[ii - 1] in l1 and s[ii + 1] in l2:
-            s = aadesh(s, ii - 1, dd[s[ii - 1]])
-        elif s[ii - 1] in l2 and s[ii + 1] in l1:
-            s = aadesh(s, ii + 1, dd[s[ii + 1]])
+    if s[ii - 1] in l1 and s[ii + 1] in l2:
+        aa = dd[s[ii - 1]]
+        jj = ii - 1
+    if s[ii - 1] in l2 and s[ii + 1] in l1:
+        aa = dd[s[ii + 1]]
+        jj = ii + 1
 
+    s = aadesh(s, jj, aa)
     df = post_processing(df, s, "ष्टुना ष्टुः", "8.4.41")
     return df
 
 def यरोऽनुनासिकेऽनुनासिको_वा(df):
     s = pre_processing(df)
-    ii = get_boundary(s)
-    if ii != -1:
-        if ACTIVE_SETTINGS.get("yaro_anunasike", True):
-            if s[ii - 1] in expand_pratyahaara("यर्") and s[ii + 1] in expand_pratyahaara("ञम्"):
-                aa = s[ii - 1]
-                if s[ii - 1] == "ग्": aa = "ङ्"
-                elif s[ii - 1] == "ज्": aa = "ञ्"
-                elif s[ii - 1] == "ड्": aa = "ण्"
-                elif s[ii - 1] == "द्": aa = "न्"
-                elif s[ii - 1] == "ब्": aa = "म्"
-                s = aadesh(s, ii - 1, aa)
-            df = post_processing(df, s, "यरोऽनुनासिकेऽनुनासिको वा", "8.4.45")
+    ii = s.index(" ")
+    if ACTIVE_SETTINGS.get("yaro_anunasike", True):
+        if s[ii - 1] in expand_pratyahaara("यर्") and s[ii + 1] in expand_pratyahaara("ञम्"):
+            if s[ii - 1] == "ग्": s = aadesh(s, ii - 1, "ङ्")
+            if s[ii - 1] == "ज्": s = aadesh(s, ii - 1, "ञ्")
+            if s[ii - 1] == "ड्": s = aadesh(s, ii - 1, "ण्")
+            if s[ii - 1] == "द्": s = aadesh(s, ii - 1, "न्")
+            if s[ii - 1] == "ब्": s = aadesh(s, ii - 1, "म्")
+
+        df = post_processing(df, s, "यरोऽनुनासिकेऽनुनासिको वा", "8.4.45")
     return df
 
 def खरि_च(df):
     s = pre_processing(df)
-    ii = get_boundary(s)
-    if ii != -1:
-        if s[ii - 1] in expand_pratyahaara("झल्") and s[ii + 1] in expand_pratyahaara("खर्"):
-            aa = s[ii - 1]
-            if s[ii - 1] in ["क्", "ख्", "ग्", "घ्"]: aa = "क्"
-            elif s[ii - 1] in ["च्", "छ्", "ज्", "झ्"]: aa = "च्"
-            elif s[ii - 1] in ["ट्", "ठ्", "ड्", "ढ्"]: aa = "ट्"
-            elif s[ii - 1] in ["त्", "थ्", "द्", "ध्"]: aa = "त्"
-            elif s[ii - 1] in ["प्", "फ्", "ब्", "भ्"]: aa = "प्"
+    ii = s.index(" ")
+    if s[ii - 1] in expand_pratyahaara("झल्") and s[ii + 1] in expand_pratyahaara("खर्"):
+        aa = s[ii - 1]
+        if s[ii - 1] in ["क्", "ख्", "ग्", "घ्"]: aa = "क्"
+        elif s[ii - 1] in ["च्", "छ्", "ज्", "झ्"]: aa = "च्"
+        elif s[ii - 1] in ["ट्", "ठ्", "ड्", "ढ्"]: aa = "ट्"
+        elif s[ii - 1] in ["त्", "थ्", "द्", "ध्"]: aa = "त्"
+        elif s[ii - 1] in ["प्", "फ्", "ब्", "भ्"]: aa = "प्"
 
-            s = aadesh(s, ii - 1, aa)
-            
-        df = post_processing(df, s, "खरि च", "8.4.55")
+        s = aadesh(s, ii - 1, aa)
+        
+    df = post_processing(df, s, "खरि च", "8.4.55")
 
-        if (s[ii - 1] in expand_pratyahaara("झय्") and s[ii + 1] == "श्" and s[ii + 2] in expand_pratyahaara("अम्")):
-            df = शशछोऽटि(df)
+    if (s[ii - 1] in expand_pratyahaara("झय्") and s[ii + 1] == "श्" and s[ii + 2] in expand_pratyahaara("अम्")):
+        df = शशछोऽटि(df)
+
     return df
 
 def वाऽवसाने(df):
     s = pre_processing(df)
     ii = len(s)
     if s[ii - 1] in expand_pratyahaara("झल्"):
-        aa = s[ii - 1]
         if s[ii - 1] in ["क्", "ख्", "ग्", "घ्"]: aa = "क्"
-        elif s[ii - 1] in ["ट्", "ठ्", "ड्", "ढ्"]: aa = "ट्"
-        elif s[ii - 1] in ["त्", "थ्", "द्", "ध्"]: aa = "त्"
-        elif s[ii - 1] in ["प्", "फ्", "ब्", "भ्"]: aa = "प्"
+        if s[ii - 1] in ["ट्", "ठ्", "ड्", "ढ्"]: aa = "ट्"
+        if s[ii - 1] in ["त्", "थ्", "द्", "ध्"]: aa = "त्"
+        if s[ii - 1] in ["प्", "फ्", "ब्", "भ्"]: aa = "प्"
 
-        s = aadesh(s, ii - 1, aa)
+    s = aadesh(s, ii - 1, aa)
     df = post_processing(df, s, "वाऽवसाने", "8.4.56")
     return df
 
 def तोर्लि(df):
     s = pre_processing(df)
-    ii = get_boundary(s)
-    if ii != -1:
+    if " " in s:
+        ii = s.index(" ")
         if s[ii - 1] in ["त्", "थ्", "द्", "ध्", "न्"] and s[ii + 1] == "ल्":
             if s[ii - 1] == "न्":
                 s = aadesh(s, ii - 1, "ल्")
@@ -558,6 +529,9 @@ def तोर्लि(df):
                 
                 if vowel_idx != -1:
                     s.insert(vowel_idx + 1, "ँ")
+                    
+                if " " in s: 
+                    s.remove(" ")
             else:
                 s = aadesh(s, ii - 1, "ल्")
             df = post_processing(df, s, "तोर्लि", "8.4.60")
@@ -565,56 +539,62 @@ def तोर्लि(df):
 
 def झयो_होऽन्यतरस्याम्(df):
     s = pre_processing(df)
-    ii = get_boundary(s)
-    if ii != -1:
-        if ACTIVE_SETTINGS.get("jhayo_ho", True):
-            if s[ii - 1] in expand_pratyahaara("झय्") and s[ii + 1] == "ह्":
-                aa = s[ii - 1]
-                if s[ii - 1] == "ग्": aa = "घ्"
-                elif s[ii - 1] == "ज्": aa = "झ्"
-                elif s[ii - 1] == "ड्": aa = "ढ्"
-                elif s[ii - 1] == "द्": aa = "ध्"
-                elif s[ii - 1] == "ब्": aa = "भ्"
+    ii = s.index(" ")
+    if ACTIVE_SETTINGS.get("jhayo_ho", True):
+        if s[ii - 1] in expand_pratyahaara("झय्") and s[ii + 1] == "ह्":
+            if s[ii - 1] == "ग्": aa = "घ्"
+            if s[ii - 1] == "ज्": aa = "झ्"
+            if s[ii - 1] == "ड्": aa = "ढ्"
+            if s[ii - 1] == "द्": aa = "ध्"
+            if s[ii - 1] == "ब्": aa = "भ्"
 
-                s = aadesh(s, ii + 1, aa)
-                del s[ii]
+            s = aadesh(s, ii + 1, aa)
+            del s[ii]
 
-            df = post_processing(df, s, "झयो होऽन्यतरस्याम्", "8.4.62")
+        df = post_processing(df, s, "झयो होऽन्यतरस्याम्", "8.4.62")
     return df
 
 def शशछोऽटि(df):
     s = pre_processing(df)
-    ii = get_boundary(s)
-    if ii != -1:
-        if ACTIVE_SETTINGS.get("shashcho_ati", True):
-            if (s[ii - 1] in expand_pratyahaara("झय्") and s[ii + 1] == "श्" and s[ii + 2] in expand_pratyahaara("अम्")):
-                s = aadesh(s, ii + 1, "छ्")
-                del s[ii]
+    ii = s.index(" ")
+    if ACTIVE_SETTINGS.get("shashcho_ati", True):
+        if (s[ii - 1] in expand_pratyahaara("झय्") and s[ii + 1] == "श्" and s[ii + 2] in expand_pratyahaara("अम्")):
+            s = aadesh(s, ii + 1, "छ्")
+            del s[ii]
 
-            df = post_processing(df, s, "शशछोऽटि", "8.4.63")
+        df = post_processing(df, s, "शशछोऽटि", "8.4.63")
     return df
 
 if __name__ == "__main__":
     df = pd.DataFrame(columns=["स्थिति", "सूत्र"])
+
     word1 = "समवेतास्"
     word2 = "जपि"
+    # word1 = 'भगोस्'
+    # word2 = 'अपि'
+
     v1 = get_vinyaasa(word1)
     v2 = get_vinyaasa(word2)
+
     word3 = word1 + " " + word2
+
     row = {"स्थिति": word3, "सूत्र": "-"}
     df = pd.concat([df, pd.DataFrame([row])], ignore_index=True)
+
     v3 = get_vinyaasa(word3)
+
     df = ससजुषो_रुः(df)
 
     s = pre_processing(df)
-    ii = get_boundary(s)
-    if ii != -1:
+    if " " in s:
+        ii = s.index(" ")
+
         if s[ii + 1] in expand_pratyahaara("खर्"):
             df = खरवसानयोर्विसर्जनीयः(df)
         else:
             if s[ii - 2] == "अ":
                 if s[ii + 1] == "अ":
-                    df = අतो_रोरप्लुतादप्लुते(df)
+                    df = अतो_रोरप्लुतादप्लुते(df)
                 elif s[ii + 1] in expand_pratyahaara("हश्"):
                     df = हशि_च(df)
                 else:
