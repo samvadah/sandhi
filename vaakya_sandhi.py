@@ -1,31 +1,27 @@
 import pandas as pd
-from akshara.varnakaarya import get_vinyaasa as _orig_get_vinyaasa, get_shabda as _orig_get_shabda
+from akshara.varnakaarya import get_vinyaasa, get_shabda
 from pratyaahaara import expand_pratyahaara
 from varna import avasaana
 from sutra import *
 import sutra
 
+def eng_to_devanagari(text):
+    mapping = str.maketrans('0123456789', '०१२३४५६७८९')
+    return str(text).translate(mapping)
+
 def safe_vinyaasa(word):
-    if not word: return []
-    word = str(word).replace("ॐ", "ओम्")
-    # Mask ≍ to prevent Illegal varna crash
-    temp_word = word.replace("≍", "ॡ")
+    if "ॐ" in word:
+        word = word.replace("ॐ", "ओम्")
     try:
-        v = _orig_get_vinyaasa(temp_word)
-        return ["≍" if x == "ॡ" else x for x in v]
+        return get_vinyaasa(word)
     except:
         return None
 
 def safe_shabda(vinyaasa_list):
     try:
-        temp_list = ["ॡ" if x == "≍" else x for x in vinyaasa_list]
-        return _orig_get_shabda(temp_list).replace("ॡ", "≍")
+        return get_shabda(vinyaasa_list)
     except:
-        return "".join(vinyaasa_list).replace("ॡ", "≍")
-
-def eng_to_devanagari(text):
-    mapping = str.maketrans('0123456789', '०१२३४५६७८९')
-    return str(text).translate(mapping)
+        return "".join(vinyaasa_list)
 
 def vaakya_sandhi(sentence: str, settings: dict = None, lang: str = "संस्कृतम्"):
     sutra.ACTIVE_SETTINGS = settings or {}
@@ -158,16 +154,7 @@ def vaakya_sandhi(sentence: str, settings: dict = None, lang: str = "संस�
 
         r = list(df["स्थिति"])[-1]
 
-        # ORTHOGRAPHIC ENGINE (Runs globally to fix Devanagari spacing)
-        # 1. Merge Halantas and Jihvamuliyas implicitly (उद् डयनम् -> उड्डयनम्)
-        r = r.replace("् ", "्").replace("≍ ", "≍")
-
-        # 2. Apply optional global space removal for Sandhi boundaries
-        if settings.get("remove_spaces", False) and len(df) > 1:
-            r = r.replace(" ", "")
-
         if " " in r:
-            # We must use safe_vinyaasa and fallback
             dd.extend(safe_vinyaasa(r.split(" ")[0]) or list(r.split(" ")[0]))
             dd.append(" ")
         else:
@@ -233,11 +220,14 @@ def vaakya_sandhi(sentence: str, settings: dict = None, lang: str = "संस�
     else:
         ee = ""
 
-    # Clean whitespace and align Dandas properly (e.g. रामः अत्र ।)
     ee = " ".join(ee.split())
-    ee = ee.replace(" ।", "।").replace(" ॥", "॥")
-    ee = ee.replace("।", "। ").replace("॥", "॥ ")
+    ee = ee.replace(" ।", "।").replace("।", " । ")
+    ee = ee.replace(" ॥", "॥").replace("॥", " ॥ ")
     ee = " ".join(ee.split())
+
+    if lang == "संस्कृतम्":
+        prakriya["सूत्र"] = prakriya["सूत्र"].apply(eng_to_devanagari)
+        sandhi_summary["सूत्राणि"] = sandhi_summary["सूत्राणि"].apply(eng_to_devanagari)
 
     prakriya.to_csv("prakriya.csv", index=False)
     sandhi_summary.to_csv("sandhi_summary.csv", index=False)
