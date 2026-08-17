@@ -5,27 +5,27 @@ from varna import avasaana
 from sutra import *
 import sutra
 
-def eng_to_devanagari(text):
-    mapping = str.maketrans('0123456789', '०१२३४५६७८९')
-    return str(text).translate(mapping)
-
 def safe_vinyaasa(word):
     if not word: return []
     word = str(word).replace("ॐ", "ओम्")
-    temp = word.replace("≍", "ॡ")
+    # Mask ≍ to prevent Illegal varna crash
+    temp_word = word.replace("≍", "ॡ")
     try:
-        v = _orig_get_vinyaasa(temp)
+        v = _orig_get_vinyaasa(temp_word)
         return ["≍" if x == "ॡ" else x for x in v]
     except:
-        return list(word)
+        return None
 
 def safe_shabda(vinyaasa_list):
     try:
-        temp = ["ॡ" if x == "≍" else x for x in vinyaasa_list]
-        res = _orig_get_shabda(temp)
-        return res.replace("ॡ", "≍")
+        temp_list = ["ॡ" if x == "≍" else x for x in vinyaasa_list]
+        return _orig_get_shabda(temp_list).replace("ॡ", "≍")
     except:
         return "".join(vinyaasa_list).replace("ॡ", "≍")
+
+def eng_to_devanagari(text):
+    mapping = str.maketrans('0123456789', '०१२३४५६७८९')
+    return str(text).translate(mapping)
 
 def vaakya_sandhi(sentence: str, settings: dict = None, lang: str = "संस्कृतम्"):
     sutra.ACTIVE_SETTINGS = settings or {}
@@ -157,20 +157,17 @@ def vaakya_sandhi(sentence: str, settings: dict = None, lang: str = "संस�
                             df = ङमो_ह्रस्वादचि_ङमुण्नित्यम्(df)
 
         r = list(df["स्थिति"])[-1]
-        
-        #ORTHOGRAPHIC ENGINE:
-        #1. Collapse native half-consonants and Jihvamuliya without breaking derivation logic
-        if " " in r:
-            parts = r.split(" ")
-            if len(parts) == 2:
-                # Merge if ends with halanta (e.g. उद् डयनम् -> उड्डयनम्) or Jihvamuliya (बाल≍ क्रीडति -> बाल≍क्रीडति)
-                if parts[0].endswith("्") or parts[0].endswith("≍"):
-                    r = r.replace(" ", "")
-                # Optional global collapse for non-merging vowels/visargas (रामो राजा -> रामोराजा)
-                elif sutra.ACTIVE_SETTINGS.get("remove_spaces", False) and len(df) > 1:
-                    r = r.replace(" ", "")
+
+        # ORTHOGRAPHIC ENGINE (Runs globally to fix Devanagari spacing)
+        # 1. Merge Halantas and Jihvamuliyas implicitly (उद् डयनम् -> उड्डयनम्)
+        r = r.replace("् ", "्").replace("≍ ", "≍")
+
+        # 2. Apply optional global space removal for Sandhi boundaries
+        if settings.get("remove_spaces", False) and len(df) > 1:
+            r = r.replace(" ", "")
 
         if " " in r:
+            # We must use safe_vinyaasa and fallback
             dd.extend(safe_vinyaasa(r.split(" ")[0]) or list(r.split(" ")[0]))
             dd.append(" ")
         else:
@@ -236,14 +233,11 @@ def vaakya_sandhi(sentence: str, settings: dict = None, lang: str = "संस�
     else:
         ee = ""
 
+    # Clean whitespace and align Dandas properly (e.g. रामः अत्र ।)
     ee = " ".join(ee.split())
     ee = ee.replace(" ।", "।").replace(" ॥", "॥")
     ee = ee.replace("।", "। ").replace("॥", "॥ ")
     ee = " ".join(ee.split())
-
-    if lang == "संस्कृतम्":
-        prakriya["सूत्र"] = prakriya["सूत्र"].apply(eng_to_devanagari)
-        sandhi_summary["सूत्राणि"] = sandhi_summary["सूत्राणि"].apply(eng_to_devanagari)
 
     prakriya.to_csv("prakriya.csv", index=False)
     sandhi_summary.to_csv("sandhi_summary.csv", index=False)
