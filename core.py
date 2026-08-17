@@ -85,7 +85,7 @@ def इको_यणचि(df):
         if s[ii] in expand_pratyahaara("इक्") and s[ii + 1] in expand_pratyahaara("अच्"):
             if s[ii] in yan_map:
                 s = aadesh(s, ii, yan_map[s[ii]])
-                return post_processing(df, s, "इको यणचि", "6.1.77")
+                return post_processing(df, s, "इko यणचि", "6.1.77")
     return df
 
 def एचोऽयवायावः(df):
@@ -277,55 +277,6 @@ def झलां_जशोऽन्ते(df):
 
     if modified:
         df = post_processing(df, s, "झलां जशोऽन्ते", "8.2.39")
-
-    # Step-by-step sequential application
-    s = pre_processing(df)
-    if " " in s:
-        ii = s.index(" ")
-        if ii >= 1 and len(s) > ii + 1:
-            l1 = ["स्", "त्", "थ्", "द्", "ध्", "न्"]
-            l2 = ["श्", "च्", "छ्", "ज्", "झ्", "ञ्"]
-            l3 = ["ष्", "ट्", "ठ्", "ड्", "ढ्", "ण्"]
-
-            if (s[ii - 1] in l1 and s[ii + 1] in l2) or (s[ii - 1] in l2 and s[ii + 1] in l1):
-                df = स्तोः_श्चुना_श्चुः(df)
-            elif (s[ii - 1] in l1 and s[ii + 1] in l3) or (s[ii - 1] in l3 and s[ii + 1] in l1):
-                df = ष्टुना_ष्टुः(df)
-
-    s = pre_processing(df)
-    if " " in s:
-        ii = s.index(" ")
-        if ii >= 1 and len(s) > ii + 1:
-            if s[ii - 1] in expand_pratyahaara("यर्") and s[ii + 1] in expand_pratyahaara("ञम्"):
-                df = यरोऽनुनासिकेऽनुनासिको_वा(df)
-
-    s = pre_processing(df)
-    if " " in s:
-        ii = s.index(" ")
-        if len(s) > ii + 1:
-            if s[ii + 1] in expand_pratyahaara("खर्"):
-                df = खरि_च(df)
-
-    s = pre_processing(df)
-    if " " in s:
-        ii = s.index(" ")
-        if len(s) > ii + 1:
-            if s[ii + 1] == "ल्":
-                df = तोर्लि(df)
-
-    # Re-evaluate position because previous sutras might have modified characters
-    s = pre_processing(df)
-    if " " in s:
-        ii = s.index(" ")
-        if ii >= 1 and len(s) > ii + 1:
-            if s[ii - 1] in expand_pratyahaara("झय्") and s[ii + 1] == "श्":
-                df = शशछोऽटि(df)
-            elif s[ii - 1] in expand_pratyahaara("झय्") and s[ii + 1] == "ह्":
-                df = झयो_होऽन्यतरस्याम्(df)
-
-    elif " " not in s:
-        df = वाऽवसाने(df)
-        
     return df
 
 def ससजुषो_रुः(df):
@@ -461,28 +412,21 @@ def विसर्जनीयस्य_सः(df):
         ii = s.index(" ")
         if ii >= 1 and len(s) > ii + 1 and s[ii - 1] == "ः" and s[ii + 1] in expand_pratyahaara("खर्"):
             s = aadesh(s, ii - 1, "स्")
-            if " " in s: s.remove(" ")
             df = post_processing(df, s, "विसर्जनीयस्य सः", "8.3.34")
             
             s = pre_processing(df)
             if " " in s:
                 ii = s.index(" ")
-            else:
-                ii = len(s)
-                for x in range(len(s)):
-                    if s[x] == "स्": ii = x + 1; break
-                
-            if ii >= 1 and len(s) > ii:
-                if s[ii - 1] == "स्" and s[ii] in ["श्", "च्", "छ्", "ज्", "झ्", "ञ्"]:
-                    df = स्तोः_श्चुना_श्चुः(df)
-                elif s[ii - 1] == "स्" and s[ii] in ["ष्", "ट्", "ठ्", "ड्", "ढ्", "ण्"]:
-                    df = ष्टुना_ष्टुः(df)
+                if ii >= 1 and len(s) > ii + 1:
+                    if s[ii - 1] == "स्" and s[ii + 1] in ["श्", "च्", "छ्", "ज्", "झ्", "ञ्"]:
+                        df = स्तोः_श्चुना_श्चुः(df)
+                    elif s[ii - 1] == "स्" and s[ii + 1] in ["ष्", "ट्", "ठ्", "ड्", "ढ्", "ण्"]:
+                        df = ष्टुना_ष्टुः(df)
     return df
 
 def शर्परे_विसर्जनीयः(df):
     s = pre_processing(df)
-    if " " in s: 
-        s.remove(" ")
+    if " " in s: s.remove(" ")
     return post_processing(df, s, "शर्परे विसर्जनीयः", "8.3.35")
 
 def वा_शरि(df):
@@ -503,7 +447,6 @@ def कुप्वोः_कपौ_च(df):
 def स्तोः_श्चुना_श्चुः(df):
     s = pre_processing(df)
     schu_map = {"स्": "श्", "त्": "च्", "थ्": "छ्", "द्": "ज्", "ध्": "झ्", "न्": "ञ्"}
-    
     if " " in s:
         ii = s.index(" ")
         if ii >= 1 and s[ii - 1] in schu_map:
@@ -517,14 +460,12 @@ def स्तोः_श्चुना_श्चुः(df):
                 if s[ii] in schu_map: s = aadesh(s, ii, schu_map[s[ii]])
                 if s[ii + 1] in schu_map: s = aadesh(s, ii + 1, schu_map[s[ii + 1]])
                 break
-                
     df = post_processing(df, s, "स्तोः श्चुना श्चुः", "8.4.40")
     return df
 
 def ष्टुना_ष्टुः(df):
     s = pre_processing(df)
     shtu_map = {"स्": "ष्", "त्": "ट्", "थ्": "ठ्", "द्": "ड्", "ध्": "ढ्", "न्": "ण्"}
-    
     if " " in s:
         ii = s.index(" ")
         if ii >= 1 and s[ii - 1] in shtu_map:
@@ -538,7 +479,6 @@ def ष्टुना_ष्टुः(df):
                 if s[ii] in shtu_map: s = aadesh(s, ii, shtu_map[s[ii]])
                 if s[ii + 1] in shtu_map: s = aadesh(s, ii + 1, shtu_map[s[ii + 1]])
                 break
-                
     df = post_processing(df, s, "ष्टुना ष्टुः", "8.4.41")
     return df
 
@@ -547,31 +487,32 @@ def यरोऽनुनासिकेऽनुनासिको_वा(df):
     if " " in s:
         ii = s.index(" ")
         if ACTIVE_SETTINGS.get("yaro_anunasike", True):
-            anunasika_map = {
-                "क्": "ङ्", "ख्": "ङ्", "ग्": "ङ्", "घ्": "ङ्",
-                "च्": "ञ्", "छ्": "ञ्", "ज्": "ञ्", "झ्": "ञ्",
-                "ट्": "ण्", "ठ्": "ण्", "ड्": "ण्", "ढ्": "ण्",
-                "त्": "न्", "थ्": "न्", "द्": "न्", "ध्": "न्",
-                "प्": "म्", "फ्": "म्", "ब्": "म्", "भ्": "म्"
-            }
-            if ii >= 1 and s[ii - 1] in anunasika_map:
-                s = aadesh(s, ii - 1, anunasika_map[s[ii - 1]])
-                if " " in s: s.remove(" ")
-                df = post_processing(df, s, "यरोऽनुनासिकेऽनुनासिको वा", "8.4.45")
+            if ii >= 1 and len(s) > ii + 1 and s[ii + 1] in expand_pratyahaara("ञम्"):
+                anunasika_map = {
+                    "क्": "ङ्", "ख्": "ङ्", "ग्": "ङ्", "घ्": "ङ्",
+                    "च्": "ञ्", "छ्": "ञ्", "ज्": "ञ्", "झ्": "ञ्",
+                    "ट्": "ण्", "ठ्": "ण्", "ड्": "ण्", "ढ्": "ण्",
+                    "त्": "न्", "थ्": "न्", "द्": "न्", "ध्": "न्",
+                    "प्": "म्", "फ्": "म्", "ब्": "म्", "भ्": "म्"
+                }
+                if s[ii - 1] in anunasika_map:
+                    s = aadesh(s, ii - 1, anunasika_map[s[ii - 1]])
+                    df = post_processing(df, s, "यरोऽनुनासिकेऽनुनासिको वा", "8.4.45")
     return df
 
 def खरि_च(df):
     s = pre_processing(df)
     if " " in s:
         ii = s.index(" ")
-        khar_map = {
-            "ग्": "क्", "घ्": "क्", "ज्": "च्", "झ्": "च्",
-            "ड्": "ट्", "ढ्": "ट्", "द्": "त्", "ध्": "त्",
-            "ब्": "प्", "भ्": "प्"
-        }
-        if ii >= 1 and s[ii - 1] in khar_map:
-            s = aadesh(s, ii - 1, khar_map[s[ii - 1]])
-            df = post_processing(df, s, "खरि च", "8.4.55")
+        if ii >= 1 and len(s) > ii + 1 and s[ii + 1] in expand_pratyahaara("खर्"):
+            khar_map = {
+                "ग्": "क्", "घ्": "क्", "ज्": "च्", "झ्": "च्",
+                "ड्": "ट्", "ढ्": "ट्", "द्": "त्", "ध्": "त्",
+                "ब्": "प्", "भ्": "प्"
+            }
+            if s[ii - 1] in khar_map:
+                s = aadesh(s, ii - 1, khar_map[s[ii - 1]])
+                df = post_processing(df, s, "खरि च", "8.4.55")
     return df
 
 def वाऽवसाने(df):
@@ -590,14 +531,12 @@ def तोर्लि(df):
     s = pre_processing(df)
     if " " in s:
         ii = s.index(" ")
-        if ii >= 1:
+        if ii >= 1 and len(s) > ii + 1 and s[ii + 1] == "ल्":
             if s[ii - 1] == "न्":
                 s = aadesh(s, ii - 1, "ल्ँ")
-                if " " in s: s.remove(" ")
                 df = post_processing(df, s, "तोर्लि", "8.4.60")
             elif s[ii - 1] in ["त्", "थ्", "द्", "ध्"]:
                 s = aadesh(s, ii - 1, "ल्")
-                if " " in s: s.remove(" ")
                 df = post_processing(df, s, "तोर्लि", "8.4.60")
     return df
 
@@ -606,15 +545,16 @@ def झयो_होऽन्यतरस्याम्(df):
     if " " in s:
         ii = s.index(" ")
         if ACTIVE_SETTINGS.get("jhayo_ho", True):
+            jhay_chars = ["क्", "ख्", "ग्", "घ्", "च्", "छ्", "ज्", "झ्", "ट्", "ठ्", "ड्", "ढ्", "त्", "थ्", "द्", "ध्", "प्", "फ्", "ब्", "भ्"]
             h_map = {
                 "क्": "घ्", "ग्": "घ्", "च्": "झ्", "ज्": "झ्",
                 "ट्": "ढ्", "ड्": "ढ्", "त्": "ध्", "द्": "ध्",
                 "प्": "भ्", "ब्": "भ्"
             }
-            if ii >= 1 and len(s) > ii + 1 and s[ii - 1] in h_map:
-                s = aadesh(s, ii + 1, h_map[s[ii - 1]])
-                if " " in s: s.remove(" ")
-                df = post_processing(df, s, "झयो होऽन्यतरस्याम्", "8.4.62")
+            if ii >= 1 and len(s) > ii + 1 and s[ii - 1] in jhay_chars and s[ii + 1] == "ह्":
+                if s[ii - 1] in h_map:
+                    s = aadesh(s, ii + 1, h_map[s[ii - 1]])
+                    df = post_processing(df, s, "झयो होऽन्यतरस्याम्", "8.4.62")
     return df
 
 def शशछोऽटि(df):
@@ -622,9 +562,9 @@ def शशछोऽटि(df):
     if " " in s:
         ii = s.index(" ")
         if ACTIVE_SETTINGS.get("shashcho_ati", True):
-            if len(s) > ii + 1 and s[ii + 1] == "श्":
+            jhay_chars = ["क्", "ख्", "ग्", "घ्", "च्", "छ्", "ज्", "झ्", "ट्", "ठ्", "ड्", "ढ्", "त्", "थ्", "द्", "ध्", "प्", "फ्", "ब्", "भ्"]
+            if ii >= 1 and len(s) > ii + 1 and s[ii - 1] in jhay_chars and s[ii + 1] == "श्":
                 s = aadesh(s, ii + 1, "छ्")
-                if " " in s: s.remove(" ")
                 df = post_processing(df, s, "शशछोऽटि", "8.4.63")
     return df
 
@@ -760,6 +700,18 @@ def vaakya_sandhi(sentence: str, settings: dict = None, lang: str = "संस�
                 else:
                     if pv[-1] in expand_pratyahaara("झल्"):
                         df = झलां_जशोऽन्ते(df)
+                        if secondary in avasaana:
+                            df = वाऽवसाने(df)
+                        else:
+                            # Sequential Cascade for all Consonant Boundaries
+                            df = स्तोः_श्चुना_श्चुः(df)
+                            df = ष्टुना_ष्टुः(df)
+                            df = यरोऽनुनासिकेऽनुनासिको_वा(df)
+                            df = खरि_च(df)
+                            df = तोर्लि(df)
+                            df = शशछोऽटि(df)
+                            df = झयो_होऽन्यतरस्याम्(df)
+                            
                     elif secondary not in avasaana and pv[-1] == "र्" and sv[0] == "र्":
                         df = रो_रि(df)
                     elif pv[-1] == "र्" and (secondary in avasaana or sv[0] in expand_pratyahaara("खर्")):
@@ -782,7 +734,6 @@ def vaakya_sandhi(sentence: str, settings: dict = None, lang: str = "संस�
         r = df[-1]["स्थिति"]
 
         if " " in r:
-            # Carry forward modifications made to the secondary word
             parts = r.split(" ", 1)
             dd.extend(safe_vinyaasa(parts[0]) or list(parts[0]))
             dd.append(" ")
@@ -827,6 +778,7 @@ def vaakya_sandhi(sentence: str, settings: dict = None, lang: str = "संस�
     if len(dd) > 0:
         ee = [dd[0]]
         for i in range(1, len(dd) - 1):
+            # Visually merges any contiguous halanta ending with the next word!
             if (dd[i] == " " and dd[i - 1] in expand_pratyahaara("हल्") and dd[i + 1] not in avasaana):
                 pass
             else:
@@ -850,9 +802,10 @@ def vaakya_sandhi(sentence: str, settings: dict = None, lang: str = "संस�
     else:
         ee = ""
 
+    # Fixes specific spacing and gracefully maps the specific "ल्ँ" font rendering visual issue.
     ee = " ".join(ee.split())
+    ee = ee.replace("ल्ँ", "ँल्")
     ee = ee.replace(" ।", "।").replace("।", " । ")
-    ee = ee.replace(" ॥", "॥").replace("॥", " ॥ ")
     ee = " ".join(ee.split())
 
     prakriya = pd.DataFrame(prakriya_rows)
