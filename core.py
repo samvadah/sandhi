@@ -93,7 +93,7 @@ def एचोऽयवायावः(df):
     ayav_map = {"ए": "अय्", "ओ": "अव्", "ऐ": "आय्", "औ": "आव्"}
     for ii in range(len(s) - 1):
         if (s[ii] in expand_pratyahaara("एच्") and s[ii + 1] in expand_pratyahaara("अच्")) or (
-            s[ii] in expand_pratyahaara("एच्") and s[ii + 1] == " " and s[ii + 2] in expand_pratyahaara("अच्")
+            s[ii] in expand_pratyahaara("एच्") and s[ii + 1] == " " and len(s) > ii + 2 and s[ii + 2] in expand_pratyahaara("अच्")
         ):
             if s[ii] in ayav_map:
                 aa = ayav_map[s[ii]]
@@ -110,7 +110,7 @@ def आद्गुणः(df):
     gun_map = {"इ": "ए", "ई": "ए", "उ": "ओ", "ऊ": "ओ", "ऋ": "अर्", "ॠ": "अर्", "ऌ": "अल्"}
     for ii in range(len(s) - 1):
         if (s[ii] in ["अ", "आ"] and s[ii + 1] in expand_pratyahaara("अच्")) or (
-            s[ii] in ["अ", "आ"] and s[ii + 1] == " " and s[ii + 2] in expand_pratyahaara("अच्")
+            s[ii] in ["अ", "आ"] and s[ii + 1] == " " and len(s) > ii + 2 and s[ii + 2] in expand_pratyahaara("अच्")
         ):
             break
     else:
@@ -130,7 +130,7 @@ def वृद्धिरेचि(df):
     vriddhi_map = {"ए": "ऐ", "ऐ": "ऐ", "ओ": "औ", "औ": "औ"}
     for ii in range(len(s) - 1):
         if (s[ii] in ["अ", "आ"] and s[ii + 1] in expand_pratyahaara("एच्")) or (
-            s[ii] in ["अ", "आ"] and s[ii + 1] == " " and s[ii + 2] in expand_pratyahaara("एच्")
+            s[ii] in ["अ", "आ"] and s[ii + 1] == " " and len(s) > ii + 2 and s[ii + 2] in expand_pratyahaara("एच्")
         ):
             break
     else:
@@ -149,7 +149,7 @@ def अकः_सवर्णे_दीर्घः(df):
     s = pre_processing(df)
     for ii in range(len(s) - 1):
         if (s[ii] in expand_pratyahaara("अक्") and s[ii + 1] in expand_pratyahaara("अक्")) or (
-            s[ii] in expand_pratyahaara("अक्") and s[ii + 1] == " " and s[ii + 2] in expand_pratyahaara("अक्")
+            s[ii] in expand_pratyahaara("अक्") and s[ii + 1] == " " and len(s) > ii + 2 and s[ii + 2] in expand_pratyahaara("अक्")
         ):
             break
     else:
@@ -358,7 +358,7 @@ def खरवसानयोर्विसर्जनीयः(df):
             else:
                 df = विसर्जनीयस्य_सः(df)
         elif len(s) > ii + 1 and s[ii + 1] in ["क्", "ख्", "प्", "फ्"]:
-            # Stays as visarga
+            # Stays as visarga 
             pass
         elif len(s) > ii + 1:
             df = विसर्जनीयस्य_सः(df)
@@ -567,10 +567,6 @@ def शशछोऽटि(df):
 # ==========================================
 # 4. VAAKYA SANDHI LOGIC
 # ==========================================
-def eng_to_devanagari(text):
-    mapping = str.maketrans('0123456789', '०१२३४५६७८९')
-    return str(text).translate(mapping)
-
 def safe_vinyaasa(word):
     if "ॐ" in word:
         word = word.replace("ॐ", "ओम्")
@@ -584,6 +580,10 @@ def safe_shabda(vinyaasa_list):
         return get_shabda(vinyaasa_list)
     except:
         return "".join(vinyaasa_list)
+
+def eng_to_devanagari(text):
+    mapping = str.maketrans('0123456789', '०१२३४५६७८९')
+    return str(text).translate(mapping)
 
 def vaakya_sandhi(sentence: str, settings: dict = None, lang: str = "संस्कृतम्"):
     global ACTIVE_SETTINGS
@@ -645,26 +645,26 @@ def vaakya_sandhi(sentence: str, settings: dict = None, lang: str = "संस�
                 elif sv[0] in expand_pratyahaara("हल्"):
                     if pv[-1] in ["अ", "इ", "उ", "ऋ", "ऌ"] and sv[0] == "छ्":
                         df = छे_च(df)
-                    else:
-                        if pv[-1] in expand_pratyahaara("एङ्") and sv[0] == "अ":
-                            df = एङः_पदान्तादति(df)
-                        elif pv[-1] in ["अ", "आ"] and sv[0] in ["ए", "ओ"] and primary in ["प्र", "अप", "अव", "उप", "परा"]:
-                            df = एङि_पररूपम्(df)
-                        elif (pv[-1] == sv[0] and pv[-1] in expand_pratyahaara("अक्")) or (
-                            set((pv[-1], sv[0])) in [
-                                set(("अ", "आ")), set(("इ", "ई")), set(("उ", "ऊ")),
-                                set(("ऋ", "ॠ")), set(("ऋ", "ऌ")), set(("ॠ", "ऌ")),
-                            ]
-                        ):
-                            df = अकः_सवर्णे_दीर्घः(df)
-                        elif pv[-1] in ["अ", "आ"] and sv[0] in expand_pratyahaara("एच्"):
-                            df = वृद्धिरेचि(df)
-                        elif pv[-1] in ["अ", "आ"] and sv[0] in expand_pratyahaara("अक्"):
-                            df = आद्गुणः(df)
-                        elif pv[-1] in expand_pratyahaara("एच्") and sv[0] in expand_pratyahaara("अच्"):
-                            df = एचोऽयवायावः(df)
-                        elif pv[-1] in expand_pratyahaara("इक्") and sv[0] in expand_pratyahaara("अच्"):
-                            df = इको_यणचि(df)
+                elif sv[0] in expand_pratyahaara("अच्"):
+                    if pv[-1] in expand_pratyahaara("एङ्") and sv[0] == "अ":
+                        df = एङः_पदान्तादति(df)
+                    elif pv[-1] in ["अ", "आ"] and sv[0] in ["ए", "ओ"] and primary in ["प्र", "अप", "अव", "उप", "परा"]:
+                        df = एङि_पररूपम्(df)
+                    elif (pv[-1] == sv[0] and pv[-1] in expand_pratyahaara("अक्")) or (
+                        set((pv[-1], sv[0])) in [
+                            set(("अ", "आ")), set(("इ", "ई")), set(("उ", "ऊ")),
+                            set(("ऋ", "ॠ")), set(("ऋ", "ऌ")), set(("ॠ", "ऌ")),
+                        ]
+                    ):
+                        df = अकः_सवर्णे_दीर्घः(df)
+                    elif pv[-1] in ["अ", "आ"] and sv[0] in expand_pratyahaara("एच्"):
+                        df = वृद्धिरेचि(df)
+                    elif pv[-1] in ["अ", "आ"] and sv[0] in expand_pratyahaara("अक्"):
+                        df = आद्गुणः(df)
+                    elif pv[-1] in expand_pratyahaara("एच्") and sv[0] in expand_pratyahaara("अच्"):
+                        df = एचोऽयवायावः(df)
+                    elif pv[-1] in expand_pratyahaara("इक्") and sv[0] in expand_pratyahaara("अच्"):
+                        df = इको_यणचि(df)
             else:
                 if (
                     secondary not in avasaana
