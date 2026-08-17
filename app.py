@@ -1,12 +1,9 @@
 import streamlit as st
 import pandas as pd
 import streamlit.components.v1 as components
-from vaakya_sandhi import vaakya_sandhi
+from core import vaakya_sandhi
 
-st.set_page_config(
-    page_title="सन्धीराट्",
-    layout="centered"
-)
+st.set_page_config( page_title="सन्धीराट्", layout="centered")
 
 # Language Toggle in Sidebar
 lang = st.sidebar.radio("भाषा / Language", ["संस्कृतम्", "English"])
@@ -29,7 +26,6 @@ if lang == "संस्कृतम्":
     t_shashcho = "शशछोऽटि (तद् शिवः -> तच्छिवः)"
     t_jhayo = "झयो होऽन्यतरस्याम् (वाग् हरिः -> वाग्घरिः)"
     t_disclaimer_title = "सूचनम्"
-    
     t_disclaimer_body = (
         "<strong>पदान्तसन्धिरेवायम्।</strong> अयं तन्त्रांशः पृथक्पदानां सन्धये एव निर्मितः न तु पदान्तर्गतसन्धये यथा ने अनम् नयनम् ।<br><br>"
         "<strong>दर्शनदोषः।</strong> विद्वाल्ँलिखति इति शुद्धरूपं तथापि टङ्कणयन्त्रस्य दर्शनदोषवशात् विद्वाँल्लिखति इति प्रदर्श्यते ।<br><br>"
@@ -40,7 +36,6 @@ if lang == "संस्कृतम्":
         "<a href='https://github.com/samvadah/sandhi/issues' target='_blank' style='text-decoration: none; padding: 5px 10px; background-color: #f0f2f6; border-radius: 5px; color: black;'>गिड्ढब्जालस्थलम्</a>"
         "</div>"
     )
-
 else:
     t_title = "Sandhify"
     t_subtitle = "Conjugate multiple words of Sanskrit together based on Paninian sutras."
@@ -59,7 +54,6 @@ else:
     t_shashcho = "Apply शशछोऽटि (e.g., तद् शिवः -> तच्छिवः)"
     t_jhayo = "Apply झयो होऽन्यतरस्याम् (e.g., वाग् हरिः -> वाग्घरिः)"
     t_disclaimer_title = "Disclaimer & Notes"
-    
     t_disclaimer_body = (
         "<strong>External Sandhi Only:</strong> This tool is meant for external sandhi (पदान्त) between separate words. It is not designed for internal sandhi (अपदान्त) like <em>ने + अनं = नयनं</em>.<br><br>"
         "<strong>Rendering Note:</strong> Correct forms are like विद्वाल्ँलिखति but we show विद्वाँल्लिखति due to standard font rendering limitations.<br><br>"
@@ -109,7 +103,6 @@ if st.button(t_btn, type="primary"):
             st.subheader(t_result)
             st.code(result, language=None)
             
-            # Integrated Aksharamukha Converter sitting in a clean expander
             with st.expander(t_convert):
                 aksharamukha_html = f"""
                 <div style="font-family: sans-serif; padding: 10px;">
@@ -121,14 +114,8 @@ if st.button(t_btn, type="primary"):
                 </div>
                 <script src="https://cdn.jsdelivr.net/gh/virtualvinodh/aksharamukha/aksharamukha-web-plugin/aksharamukha-v3.js?source=Devanagari&class=aksharamukha-text"></script>
                 """
-                # Using allow-scripts and allow-same-origin so the API can populate the dropdown list
-                components.html(
-                    aksharamukha_html, 
-                    height=250, 
-                    scrolling=True
-                )
+                components.html(aksharamukha_html, height=250, scrolling=True)
             
-            # Format DataFrames with Explicit Numbering
             if lang == "संस्कृतम्":
                 prakriya.columns = ["स्थितिः", "सूत्रम्"]
                 summary.columns = ["पदसमूहः", "सूत्राणि", "सन्धियुक्तरूपम्"]
