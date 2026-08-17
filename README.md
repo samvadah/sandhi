@@ -3,7 +3,7 @@
 # 👑 सन्धीराट् (Sandhify)
 ### High-Precision Paninian Sanskrit Sandhi & Prakriya Derivation Engine
 
-[![Streamlit App](https://static.streamlit.io/badges/streamlit_badge_black_white.svg)](https://sandhi.streamlit.app/)
+[![Streamlit App](https://static.streamlit.io/badges/streamlit_badge_black_white.svg)](https://sandhify.streamlit.app/)
 [![Python 3.9+](https://img.shields.io/badge/python-3.9+-blue.svg)](https://www.python.org/downloads/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
 [![GitHub stars](https://img.shields.io/github/stars/samvadah/sandhi?style=social)](https://github.com/samvadah/sandhi)
@@ -12,7 +12,7 @@
   <b>A rule-based Sanskrit Computational Linguistics engine that executes full-sentence Padanta Sandhi (पदान्त सन्धि) according to Panini's <i>Ashtadhyayi</i> with step-by-step grammatical derivations (प्रक्रिया).</b>
 </p>
 
-[Live Demo](https://sandhi.streamlit.app/) • [Features](#-key-features) • [Installation](#-quickstart) • [Python Usage](#-python-api-usage) • [Supported Sutras](#-covered-ashtadhyayi-sutras)
+[Live Demo](https://sandhify.streamlit.app/) • [Features](#-key-features) • [Installation](#-quickstart) • [Python Usage](#-python-api-usage) • [Supported Sutras](#-covered-ashtadhyayi-sutras)
 
 </div>
 
