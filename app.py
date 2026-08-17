@@ -79,7 +79,6 @@ st.sidebar.header(t_settings)
 
 lopa_shakalyasya = st.sidebar.checkbox(t_lopa, value=True)
 vaa_shari = st.sidebar.checkbox(t_vaa, value=True)
-jihva_upadh = st.sidebar.checkbox(t_jihva, value=False)
 yaro_anunasike = st.sidebar.checkbox(t_yaro, value=True)
 shashcho_ati = st.sidebar.checkbox(t_shashcho, value=True)
 jhayo_ho = st.sidebar.checkbox(t_jhayo, value=True)
@@ -87,7 +86,6 @@ jhayo_ho = st.sidebar.checkbox(t_jhayo, value=True)
 settings = {
     "lopa_shakalyasya": lopa_shakalyasya,
     "vaa_shari": vaa_shari,
-    "jihva_upadh": jihva_upadh,
     "yaro_anunasike": yaro_anunasike,
     "shashcho_ati": shashcho_ati,
     "jhayo_ho": jhayo_ho
