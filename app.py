@@ -130,7 +130,7 @@ if st.button(t_btn, type="primary"):
                 """
                 components.html(aksharamukha_html, height=250, scrolling=True)
             
-            # Format DataFrames 
+            # Format DataFrames with Explicit Numbering
             if lang == "संस्कृतम्":
                 prakriya.columns = ["स्थितिः", "सूत्रम्"]
                 summary.columns = ["पदसमूहः", "सूत्राणि", "सन्धियुक्तरूपम्"]
